@@ -99,6 +99,7 @@ QTreeWidget, QTableWidget, QListWidget { background:#0f1512; border:none; border
 QHeaderView::section { background:#131b16; color:#c9d3cc; padding:8px; border:none; }
 QGroupBox { border:none; margin-top:14px; padding-top:14px; font-weight:bold; color:#c9d3cc; }
 QGroupBox::title { subcontrol-origin:margin; left:12px; padding:0 6px; background:#0b100d; }
+QGroupBox#plainBox { margin-top:0; padding-top:4px; font-weight:normal; }
 QRadioButton { padding:4px 8px; spacing:6px; }
 QCheckBox { spacing:6px; }
 QScrollBar:vertical { background:transparent; width:10px; border-radius:5px; }
@@ -170,6 +171,7 @@ QTreeWidget, QTableWidget, QListWidget { background:#ffffff; border:none; border
 QHeaderView::section { background:#f5f7f5; color:#333333; padding:8px; border:none; }
 QGroupBox { border:none; margin-top:14px; padding-top:14px; font-weight:bold; color:#333333; }
 QGroupBox::title { subcontrol-origin:margin; left:12px; padding:0 6px; background:#ffffff; }
+QGroupBox#plainBox { margin-top:0; padding-top:4px; font-weight:normal; }
 QRadioButton { padding:4px 8px; spacing:6px; }
 QCheckBox { spacing:6px; }
 QScrollBar:vertical { background:transparent; width:10px; border-radius:5px; }
@@ -787,21 +789,9 @@ class HomePage(QWidget):
         head.addWidget(back_about_btn(self), 0, Qt.AlignTop)
         v.addLayout(head)
 
-        # 使用流程
-        flow = QFrame()
-        flow.setObjectName("flow")
-        fl = QHBoxLayout(flow)
-        fl.setContentsMargins(14, 8, 14, 8)
-        ft = QLabel("使用流程：检测范围 + 级别 → 填写被测对象与登录方式 → "
-                    "（可选）层专属配置 / 批量导入 → 开始自查 → 问卷评估 → 导出报告")
-        ft.setObjectName("flowText")
-        ft.setWordWrap(True)
-        fl.addWidget(ft)
-        self._flow_frame = flow
-        v.addWidget(flow)
-
         # ---------- 选择检测范围 + 等保级别 + 批量导入入口 ----------
-        scope = QGroupBox("检测范围")
+        scope = QGroupBox("")
+        scope.setObjectName("plainBox")
         sv = QVBoxLayout(scope)
         sv.setContentsMargins(14, 14, 14, 12)
         sv.setSpacing(8)
