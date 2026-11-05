@@ -1,0 +1,93 @@
+{
+  "format": 1,
+  "version": "2026.11.02",
+  "updated": "2026-11-02",
+  "source": "内置离线基线（人工维护，可按需导入更新）",
+  "products": {
+    "windows": {
+      "name": "Windows 操作系统",
+      "min_builds": {
+        "Windows 10": 19045,
+        "Windows 11": 22631,
+        "Server 2016": 14393,
+        "Server 2019": 17763,
+        "Server 2022": 20348
+      },
+      "note": "低于对应版本的最新累积更新基线，存在未修复漏洞风险"
+    },
+    "linux": {
+      "name": "Linux 内核",
+      "min_version": "4.19",
+      "note": "内核版本低于基线或长期未更新，需核查发行版安全公告"
+    },
+    "openssh": {
+      "name": "OpenSSH",
+      "min_version": "8.0",
+      "note": "建议升级至发行版最新安全版本"
+    },
+    "sqlserver": {
+      "name": "Microsoft SQL Server",
+      "min_major": 15,
+      "min_build": "15.0.4000",
+      "note": "2019 及以上受支持；低于基线构建号需安装最新 CU"
+    },
+    "mysql": {
+      "name": "MySQL",
+      "min_version": "8.0.36",
+      "note": "5.7 已停止支持，8.0 需跟进最新小版本"
+    },
+    "mariadb": {
+      "name": "MariaDB",
+      "min_version": "10.6.16",
+      "note": "建议升级至 10.11 LTS 或更高"
+    },
+    "postgresql": {
+      "name": "PostgreSQL",
+      "min_version": "14.13",
+      "note": "13 及以下已停止支持，建议 16/17"
+    },
+    "redis": {
+      "name": "Redis",
+      "min_version": "7.0.15",
+      "note": "6.x 已停止维护，建议 7.x 及以上"
+    },
+    "mongodb": {
+      "name": "MongoDB",
+      "min_version": "6.0.0",
+      "note": "建议升级至受支持的 6.0/7.0 系列"
+    },
+    "oracle": {
+      "name": "Oracle Database",
+      "min_version": "19.3",
+      "note": "建议 19c 并应用最新 CPU 补丁"
+    },
+    "sap_ase": {
+      "name": "SAP ASE（原 Sybase ASE）",
+      "min_version": "16.0",
+      "note": "ASE 16.0 为长期支持版本，需按 SAP 安全公告（Security Notes）安装补丁"
+    },
+    "sap_iq": {
+      "name": "SAP IQ（原 Sybase IQ）",
+      "min_version": "16.1",
+      "note": "建议 IQ 16.1 SP 最新补丁，关注 SAP 安全公告"
+    },
+    "sap_sqlanywhere": {
+      "name": "SAP SQL Anywhere",
+      "min_version": "17.0",
+      "note": "建议 SQL Anywhere 17 最新维护版本"
+    },
+    "sap_rs": {
+      "name": "SAP Replication Server",
+      "min_version": "16.0",
+      "note": "建议 Replication Server 16.0 SP 最新补丁，关注 SAP 安全公告"
+    }
+  },
+  "cves": [],
+  "cve_schema": {
+    "id": "CVE-YYYY-NNNN 或厂商公告编号",
+    "product": "与 products 中的键一致，如 sqlserver/mysql/sap_ase",
+    "severity": "critical / high / medium / low",
+    "fixed": "修复该漏洞的最低版本，低于该版本即判定命中",
+    "note": "受影响范围与缓解说明"
+  }
+}

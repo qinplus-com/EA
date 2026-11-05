@@ -1,0 +1,10 @@
+PyQt5>=5.15
+python-docx>=0.8.11
+paramiko>=3.0
+pysnmp>=4.4.12
+pywinrm>=0.4.3
+pymysql>=1.1.0
+psycopg2-binary>=2.9
+pymssql>=2.2
+openpyxl>=3.1
+cryptography>=3.4

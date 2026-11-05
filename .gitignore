@@ -1,0 +1,23 @@
+# ===== 开源发布排除项 =====
+# Web 演示版（独立维护，不随开源版发布）
+web-demo/
+
+# 打包产物（软件包不随源码发布）
+dist/
+build/
+*.spec.bak
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 本地开发杂项
+.screenshots/
+.trae-html-share-packages/
+*.err
+scope_preview.png
+ea_dengbao_new.spec
+
+# 用户运行时数据（若误放于仓库根）
+.ea_dengbao/

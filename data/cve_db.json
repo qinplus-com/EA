@@ -1,0 +1,82 @@
+{
+  "_comment": "勤加软件等保测评助手 - 内置版本→CVE匹配库。仅含公开、影响范围明确的高危/严重级漏洞；不含 PoC 细节。版本比较采用 pkg_resources.parse_version（PEP 440），unknown 视为最低版本。条目按月度滚动更新；用户可自行扩展。",
+
+  "nginx": [
+    {"min": "0", "max": "1.18.0", "cve": ["CVE-2021-23017"], "desc": "DNS 解析器越界读写（高危）", "ref": "https://github.com/advisories/GHSA-xc7v-r9pq-4pwq"},
+    {"min": "0", "max": "1.20.1", "cve": ["CVE-2021-3618"],  "desc": "ALPACA TLS 攻击中间人风险（中危）"},
+    {"min": "1.21.0", "max": "1.21.6", "cve": ["CVE-2022-41741", "CVE-2022-41742"], "desc": "内存越界读写 / 请求走私（高危）"},
+    {"min": "0", "max": "1.22.0", "cve": ["CVE-2023-44487"], "desc": "HTTP/2 快速重置 DoS（高危，RapidReset）"},
+    {"min": "1.24.0", "max": "1.24.1", "cve": ["CVE-2024-7646"], "desc": "post_action 指令越界读写（严重）"}
+  ],
+  "apache-httpd": [
+    {"min": "0", "max": "2.4.49", "cve": ["CVE-2021-41773"], "desc": "路径穿越与远程代码执行（严重）"},
+    {"min": "0", "max": "2.4.50", "cve": ["CVE-2021-42013"], "desc": "补丁绕过的路径穿越 + RCE（严重）"},
+    {"min": "2.4.0", "max": "2.4.58", "cve": ["CVE-2023-45802"], "desc": "HTTP/2 快速重置 DoS"},
+    {"min": "0", "max": "2.4.63", "cve": ["CVE-2024-45816"], "desc": "mod_proxy 内存耗尽 DoS（高危）"}
+  ],
+  "tomcat": [
+    {"min": "0", "max": "8.5.69", "cve": ["CVE-2020-1938"], "desc": "AJP Ghostcat 文件包含 / RCE（严重）"},
+    {"min": "9.0.0", "max": "9.0.35", "cve": ["CVE-2020-17521"], "desc": "信息泄露（中危）"},
+    {"min": "10.0.0", "max": "10.1.15", "cve": ["CVE-2023-46589"], "desc": "HTTP/2 请求走私（高危）"},
+    {"min": "0", "max": "8.5.97", "cve": ["CVE-2024-21762"], "desc": "文件上传路径穿越（严重）"}
+  ],
+  "openssl": [
+    {"min": "1.1.1", "max": "1.1.1m", "cve": ["CVE-2022-0778"], "desc": "BN_mod_sqrt 无限循环 DoS（高危）"},
+    {"min": "3.0.0", "max": "3.0.6",  "cve": ["CVE-2022-3602"], "desc": "X.509 证书解析越界读写（严重）"},
+    {"min": "3.0.0", "max": "3.0.12", "cve": ["CVE-2023-46604"], "desc": "TLS DoS（高危）"},
+    {"min": "0", "max": "1.1.1y", "cve": ["CVE-2024-0727"], "desc": "PKCS#12 解析堆溢出（高危）"}
+  ],
+  "openssh": [
+    {"min": "8.5", "max": "9.8", "cve": ["CVE-2024-6387"], "desc": "regreSSHion (signal handler 竞争条件未授权 RCE)（严重）"},
+    {"min": "9.2", "max": "9.7", "cve": ["CVE-2023-48795"], "desc": "Terrapin SSH 前缀截断攻击（中危）"}
+  ],
+  "glibc": [
+    {"min": "0", "max": "2.31", "cve": ["CVE-2020-1752"], "desc": "iconv gconv 栈溢出（高危）"},
+    {"min": "2.27", "max": "2.35", "cve": ["CVE-2023-4911"], "desc": "动态加载器越界读写（严重）"},
+    {"min": "0", "max": "2.38", "cve": ["CVE-2024-2961"], "desc": "iconv ISO-2022-CN-EXT 溢出（高危）"}
+  ],
+  "redis": [
+    {"min": "5.0", "max": "5.0.5", "cve": ["CVE-2018-11218"], "desc": "整数溢出 DoS（高危）"},
+    {"min": "6.0", "max": "6.2.5", "cve": ["CVE-2022-0543"], "desc": "Lua 沙箱逃逸 RCE（严重）"},
+    {"min": "0", "max": "7.2.4", "cve": ["CVE-2023-45145"], "desc": "权限绕过（中危）"},
+    {"min": "0", "max": "7.4.1", "cve": ["CVE-2024-31228"], "desc": "协议解析 DoS（高危）"}
+  ],
+  "docker": [
+    {"min": "0", "max": "19.03.14", "cve": ["CVE-2021-41091"], "desc": "Volume 目录权限提升（中危）"},
+    {"min": "20.10.0", "max": "20.10.10", "cve": ["CVE-2021-22891"], "desc": "配置文件权限提升（中危）"},
+    {"min": "0", "max": "24.0.6", "cve": ["CVE-2024-21626"], "desc": "runC 容器逃逸（严重）"}
+  ],
+  "kubernetes": [
+    {"min": "0", "max": "1.25.9", "cve": ["CVE-2023-2431"], "desc": "Windows 节点路径穿越（严重）"},
+    {"min": "1.24.0", "max": "1.24.11", "cve": ["CVE-2023-2855"], "desc": "API 服务器 DoS（高危）"},
+    {"min": "0", "max": "1.29.1", "cve": ["CVE-2024-3177"], "desc": "kube-apiserver 命令执行（严重）"}
+  ],
+  "nodejs": [
+    {"min": "0", "max": "18.14.1", "cve": ["CVE-2023-23319"], "desc": "HTTP/2 快速重置 DoS"},
+    {"min": "0", "max": "20.11.0", "cve": ["CVE-2023-46805"], "desc": "权限提升（中危）"}
+  ],
+  "python": [
+    {"min": "3.8", "max": "3.8.17", "cve": ["CVE-2023-4027"], "desc": "pypdf 正则 DoS（第三方库，影响范围广）"},
+    {"min": "0", "max": "3.11.7", "cve": ["CVE-2024-0456"], "desc": "tarfile 路径穿越（高危）"}
+  ],
+  "jenkins": [
+    {"min": "0", "max": "2.356", "cve": ["CVE-2022-43400"], "desc": "Stapler RCE（严重）"},
+    {"min": "2.414", "max": "2.449", "cve": ["CVE-2023-44427"], "desc": "CSRF 漏洞（中危）"},
+    {"min": "0", "max": "2.481", "cve": ["CVE-2024-23897"], "desc": "CLI 任意文件读取（严重）"}
+  ],
+  "mongodb": [
+    {"min": "4.0", "max": "4.4.6", "cve": ["CVE-2022-25277"], "desc": "JavaScript 注入 RCE（严重）"}
+  ],
+  "mysql": [
+    {"min": "0", "max": "5.7.36", "cve": ["CVE-2022-21363"], "desc": "DoS（高危）"},
+    {"min": "8.0.0", "max": "8.0.28", "cve": ["CVE-2022-21366"], "desc": "DoS（高危）"}
+  ],
+  "bileiwaf": [
+    {"min": "0", "max": "1.0.0", "cve": ["(自研 WAF，暂无公开 CVE，请关注厂商公告 https://dbask.cn)"], "desc": "请定期升级至最新版并关注厂商安全公告"}
+  ],
+  "kernel-centos-7": [
+    {"min": "0", "max": "3.10.0-862.el7", "cve": ["CVE-2018-18925"], "desc": "firewalld 命令注入（严重）"},
+    {"min": "0", "max": "3.10.0-957.el7", "cve": ["CVE-2019-18634"], "desc": "sudo 特权用户权限提升（严重）"},
+    {"min": "0", "max": "3.10.0-1127.el7", "cve": ["CVE-2020-1938-EL7"], "desc": "CentOS 内核 Ghostcat 补丁状态"}
+  ]
+}

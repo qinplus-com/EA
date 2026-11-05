@@ -1,0 +1,11 @@
+#!/bin/sh
+# 勤加软件等保测评助手 - 命令行版启动脚本（由 make install 生成）
+LIBDIR="@LIBDIR@"
+PY="@PYTHON@"
+
+if ! command -v "$PY" >/dev/null 2>&1; then
+    PY=python3
+fi
+
+cd "$LIBDIR" || exit 1
+exec "$PY" "$LIBDIR/cli.py" "$@"

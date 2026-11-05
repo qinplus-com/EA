@@ -1,0 +1,116 @@
+# 勤加软件等保测评助手 - Linux 安装 Makefile
+# 本文件由 configure 生成（不要直接编辑；修改 Makefile.in 后重新执行 ./configure）
+#
+# 常用目标：
+#   make            检查运行环境
+#   sudo make install       安装桌面版 + 命令行版
+#   sudo make uninstall     卸载
+#   make rpm        生成 RPM 安装包（rpmbuild）
+#   make deb        生成 DEB 安装包（dpkg-deb，Debian/Ubuntu/UOS/Deepin）
+#   make dist       生成源码包 tar.gz
+
+PREFIX   = @PREFIX@
+BINDIR   = $(PREFIX)/bin
+DATADIR  = $(PREFIX)/share
+APPDIR   = $(DATADIR)/applications
+ICONDIR  = $(DATADIR)/icons/hicolor/256x256/apps
+LIBDIR   = $(DATADIR)/qinplus-dengbao
+
+PYTHON   = @PYTHON@
+NAME     = qinplus-dengbao
+VERSION  = @VERSION@
+DESTDIR  =
+
+PYFILES  = main.py cli.py
+PYDIRS   = core checks questionnaire ui
+DATAFILES = data assets
+
+RPMTOP   = $(CURDIR)/dist/rpmbuild
+DISTDIR  = $(CURDIR)/dist
+
+.PHONY: all install uninstall clean dist rpm deb check-runtime
+
+all: check-runtime
+	@echo ""
+	@echo "构建完成（纯 Python 实现，无需编译）。"
+	@echo "  sudo make install    安装桌面版与命令行版"
+	@echo "  make rpm             生成 RPM 安装包"
+
+check-runtime:
+	@$(PYTHON) -c "import sys; print('Python  :', sys.version.split()[0])"
+	@$(PYTHON) -c "import PyQt5" 2>/dev/null && echo "PyQt5   : OK（桌面版可用）" \
+	    || echo "PyQt5   : 未安装（桌面版不可用，命令行版可用）"
+	@$(PYTHON) -c "import paramiko" 2>/dev/null && echo "paramiko: OK（SSH 远程检测可用）" \
+	    || echo "paramiko: 未安装（SSH 远程检测不可用）"
+
+install:
+	@echo "安装到 $(DESTDIR)$(LIBDIR) ..."
+	install -d $(DESTDIR)$(LIBDIR)
+	install -d $(DESTDIR)$(LIBDIR)/data
+	install -d $(DESTDIR)$(LIBDIR)/assets/icons
+	install -m 644 $(PYFILES) $(DESTDIR)$(LIBDIR)/
+	cp -a $(PYDIRS) $(DESTDIR)$(LIBDIR)/
+	-find $(DESTDIR)$(LIBDIR) -name '__pycache__' -prune -exec rm -rf {} + 2>/dev/null || true
+	-find $(DESTDIR)$(LIBDIR) -name '*.pyc' -delete 2>/dev/null || true
+	cp -a data/. $(DESTDIR)$(LIBDIR)/data/
+	cp -a assets/. $(DESTDIR)$(LIBDIR)/assets/
+	install -d $(DESTDIR)$(BINDIR)
+	sed -e 's|@LIBDIR@|$(LIBDIR)|g' -e 's|@PYTHON@|$(PYTHON)|g' \
+	    packaging/linux/qinplus-dengbao.in > $(DESTDIR)$(BINDIR)/$(NAME)
+	sed -e 's|@LIBDIR@|$(LIBDIR)|g' -e 's|@PYTHON@|$(PYTHON)|g' \
+	    packaging/linux/qinplus-dengbao-cli.in > $(DESTDIR)$(BINDIR)/$(NAME)-cli
+	chmod 755 $(DESTDIR)$(BINDIR)/$(NAME) $(DESTDIR)$(BINDIR)/$(NAME)-cli
+	install -d $(DESTDIR)$(APPDIR)
+	sed -e 's|@BINDIR@|$(BINDIR)|g' \
+	    packaging/linux/qinplus-dengbao.desktop.in > $(DESTDIR)$(APPDIR)/$(NAME).desktop
+	chmod 644 $(DESTDIR)$(APPDIR)/$(NAME).desktop
+	install -d $(DESTDIR)$(ICONDIR)
+	@if [ -f assets/icon.png ]; then \
+	    install -m 644 assets/icon.png $(DESTDIR)$(ICONDIR)/$(NAME).png; \
+	fi
+	@if command -v update-desktop-database >/dev/null 2>&1; then \
+	    update-desktop-database -q $(DESTDIR)$(APPDIR) 2>/dev/null || true; \
+	fi
+	@echo "安装完成："
+	@echo "  桌面版   : $(BINDIR)/$(NAME)"
+	@echo "  命令行版 : $(BINDIR)/$(NAME)-cli"
+	@echo "提示：部分检测项（/etc/shadow 等）需 root 权限：sudo $(NAME)"
+
+uninstall:
+	rm -rf $(DESTDIR)$(LIBDIR)
+	rm -f $(DESTDIR)$(BINDIR)/$(NAME) $(DESTDIR)$(BINDIR)/$(NAME)-cli
+	rm -f $(DESTDIR)$(APPDIR)/$(NAME).desktop
+	rm -f $(DESTDIR)$(ICONDIR)/$(NAME).png
+	@if command -v update-desktop-database >/dev/null 2>&1; then \
+	    update-desktop-database -q $(DESTDIR)$(APPDIR) 2>/dev/null || true; \
+	fi
+	@echo "已卸载。"
+
+clean:
+	rm -f Makefile
+	rm -rf $(DISTDIR)/$(NAME)-$(VERSION) $(DISTDIR)/$(NAME)-$(VERSION).tar.gz
+
+dist:
+	@echo "生成源码包 ..."
+	rm -rf $(DISTDIR)/$(NAME)-$(VERSION)
+	mkdir -p $(DISTDIR)/$(NAME)-$(VERSION)
+	tar -cf - --exclude-vcs --exclude='dist' --exclude='build' \
+	    --exclude='web-demo' --exclude='__pycache__' --exclude='*.pyc' . \
+	    | (cd $(DISTDIR)/$(NAME)-$(VERSION) && tar -xf -)
+	tar -czf $(DISTDIR)/$(NAME)-$(VERSION).tar.gz -C $(DISTDIR) $(NAME)-$(VERSION)
+	@echo "源码包：$(DISTDIR)/$(NAME)-$(VERSION).tar.gz"
+
+rpm: dist
+	@command -v rpmbuild >/dev/null 2>&1 || { echo "缺少 rpmbuild，请先安装 rpm-build"; exit 1; }
+	mkdir -p $(RPMTOP)/BUILD $(RPMTOP)/RPMS $(RPMTOP)/SOURCES $(RPMTOP)/SPECS $(RPMTOP)/SRPMS
+	cp $(DISTDIR)/$(NAME)-$(VERSION).tar.gz $(RPMTOP)/SOURCES/
+	sed -e 's|@VERSION@|$(VERSION)|g' \
+	    packaging/linux/$(NAME).spec.in > $(RPMTOP)/SPECS/$(NAME).spec
+	rpmbuild --define "_topdir $(RPMTOP)" -bb $(RPMTOP)/SPECS/$(NAME).spec
+	@echo ""
+	@echo "RPM 安装包："
+	@find $(RPMTOP)/RPMS -name '*.rpm' -print
+
+deb: dist
+	@command -v dpkg-deb >/dev/null 2>&1 || { echo "缺少 dpkg-deb"; exit 1; }
+	sh packaging/linux/build_deb.sh "$(VERSION)" "$(DISTDIR)" "$(NAME)"

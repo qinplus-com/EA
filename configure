@@ -1,0 +1,95 @@
+#!/bin/sh
+# -*- coding: utf-8 -*-
+# 勤加软件等保测评助手 - Linux 配置脚本
+#
+# 用法：
+#   ./configure                       # 默认安装到 /usr/local
+#   ./configure --prefix=/usr         # 指定安装前缀
+#   ./configure --prefix=/opt/ea --python=python3.9
+#
+# 生成 Makefile 后执行：
+#   make            # 检查运行环境
+#   sudo make install
+#   sudo make uninstall
+#   make rpm        # 生成 RPM 安装包
+#   make dist       # 生成源码包 tar.gz
+
+set -e
+
+prefix=/usr/local
+python=python3
+name="qinplus-dengbao"
+version="1.0"
+
+usage() {
+    cat <<EOF
+Usage: ./configure [options]
+
+Options:
+  --prefix=DIR        安装前缀（默认 /usr/local，国产系统常用 /usr）
+  --python=PATH       指定 python3 解释器（默认 python3）
+  --version=VERSION   覆盖版本号（默认 $version）
+  --help              显示本帮助
+EOF
+}
+
+for arg in "$@"; do
+    case "$arg" in
+        --prefix=*) prefix="${arg#*=}" ;;
+        --python=*) python="${arg#*=}" ;;
+        --version=*) version="${arg#*=}" ;;
+        --help|-h) usage; exit 0 ;;
+        *) echo "configure: 未知参数 $arg"; usage; exit 1 ;;
+    esac
+done
+
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$ROOT"
+
+[ -f Makefile.in ] || { echo "configure: 缺少 Makefile.in"; exit 1; }
+
+# 检查 Python 解释器
+if ! command -v "$python" >/dev/null 2>&1; then
+    echo "configure: 未找到 $python，请先安装 python3"
+    exit 1
+fi
+
+PY_VER="$("$python" -c 'import sys;print(sys.version.split()[0])')"
+echo "检查 Python ：$python ($PY_VER)"
+
+if "$python" -c 'import PyQt5' >/dev/null 2>&1; then
+    echo "检查 PyQt5  ：已安装（桌面版可用）"
+    HAVE_QT=1
+else
+    echo "检查 PyQt5  ：未安装（桌面版不可用，命令行版仍可安装使用）"
+    echo "            国产系统可执行：sudo apt install python3-pyqt5  或  sudo yum install python3-qt5"
+    HAVE_QT=0
+fi
+
+if "$python" -c 'import paramiko' >/dev/null 2>&1; then
+    echo "检查 paramiko：已安装（SSH 远程检测可用）"
+else
+    echo "检查 paramiko：未安装（SSH 远程检测不可用，可执行 sudo apt install python3-paramiko）"
+fi
+
+if "$python" -c 'import docx' >/dev/null 2>&1; then
+    echo "检查 python-docx：已安装（Word 报告导出可用）"
+else
+    echo "检查 python-docx：未安装（Word 报告不可用，可执行 sudo apt install python3-docx）"
+fi
+
+# 生成 Makefile
+sed -e "s|@PREFIX@|$prefix|g" \
+    -e "s|@PYTHON@|$python|g" \
+    -e "s|@VERSION@|$version|g" \
+    Makefile.in > Makefile
+
+echo ""
+echo "已生成 Makefile："
+echo "  安装前缀 : $prefix"
+echo "  桌面版   : $prefix/bin/$name"
+echo "  命令行版 : $prefix/bin/$name-cli"
+echo "  程序文件 : $prefix/share/$name"
+echo ""
+echo "下一步：make && sudo make install"
+echo "打包    ：make rpm   /   make dist"

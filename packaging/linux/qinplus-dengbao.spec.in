@@ -1,0 +1,63 @@
+# 勤加软件等保测评助手 - RPM 打包脚本
+# 由 make rpm 使用（@VERSION@ 在生成时替换）
+#
+# 纯 Python 实现，BuildArch=noarch，可在 x86_64 / aarch64 / 龙芯 loongarch64 /
+# 鲲鹏 / 飞腾等国产平台构建同一个包。
+
+Name:           qinplus-dengbao
+Version:        @VERSION@
+Release:        1%{?dist}
+Summary:        勤加软件等保测评助手（等保 2.0 自查与测评辅助工具）
+Summary(zh_CN): 勤加软件等保测评助手（等保 2.0 自查与测评辅助工具）
+
+License:        Proprietary
+URL:            https://ea.qinplus.com
+Source0:        %{name}-%{version}.tar.gz
+BuildArch:      noarch
+BuildRequires:  make
+
+Requires:       python3
+
+%description
+勤加软件等保测评助手（简称：测评助手，Evaluation Assistant）
+按 GB/T 22239-2019 等保二级 / 三级要求落地检测项：
+技术类（操作系统的身份鉴别、访问控制、安全审计、入侵防范、恶意代码防范、
+数据备份恢复；网络与边界；数据库；中间件与 Web；应用与数据）自动取证，
+物理与管理类以问卷评估方式人工核查，可导出 HTML / Word / PDF 自查报告。
+
+包含桌面版（qinplus-dengbao）与命令行版（qinplus-dengbao-cli），
+适配麒麟 Kylin、统信 UOS、Deepin、Anolis、OpenEuler 等国产操作系统。
+
+可选运行依赖（按需安装）：
+  python3-qt5（桌面版）、python3-paramiko（SSH 远程检测）、
+  python3-docx（Word 报告）、python3-pysnmp（SNMP 设备核查）。
+
+%prep
+%setup -q
+
+%build
+sh ./configure --prefix=%{_prefix} --python=python3
+
+%install
+make install DESTDIR=%{buildroot}
+
+%post
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database -q %{_datadir}/applications 2>/dev/null || true
+fi
+
+%postun
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database -q %{_datadir}/applications 2>/dev/null || true
+fi
+
+%files
+%{_bindir}/qinplus-dengbao
+%{_bindir}/qinplus-dengbao-cli
+%{_datadir}/qinplus-dengbao
+%{_datadir}/applications/qinplus-dengbao.desktop
+%{_datadir}/icons/hicolor/256x256/apps/qinplus-dengbao.png
+
+%changelog
+* Wed Nov 05 2026 Qinplus Software <support@qinplus.com> - @VERSION@
+- 发布勤加软件等保测评助手 V@VERSION@（桌面版 + 命令行版）

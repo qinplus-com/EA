@@ -1,0 +1,18 @@
+#!/bin/sh
+# 勤加软件等保测评助手 - 桌面版启动脚本（由 make install 生成）
+LIBDIR="@LIBDIR@"
+PY="@PYTHON@"
+
+if ! command -v "$PY" >/dev/null 2>&1; then
+    PY=python3
+fi
+
+if ! "$PY" -c 'import PyQt5' >/dev/null 2>&1; then
+    echo "未安装 PyQt5，桌面版无法启动。" >&2
+    echo "请安装：sudo apt install python3-pyqt5  或  sudo yum install python3-qt5" >&2
+    echo "命令行版可用：qinplus-dengbao-cli --help" >&2
+    exit 1
+fi
+
+cd "$LIBDIR" || exit 1
+exec "$PY" "$LIBDIR/main.py" "$@"

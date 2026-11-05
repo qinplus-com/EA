@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=勤加软件等保测评助手
+Name[zh_CN]=勤加软件等保测评助手
+GenericName=等保测评助手
+GenericName[zh_CN]=等保测评助手
+Comment=网络安全等级保护 2.0 自查与测评辅助（技术检测 / 问卷评估 / 报告输出）
+Comment[zh_CN]=网络安全等级保护 2.0 自查与测评辅助（技术检测 / 问卷评估 / 报告输出）
+Exec=@BINDIR@/qinplus-dengbao
+TryExec=@BINDIR@/qinplus-dengbao
+Icon=qinplus-dengbao
+Terminal=false
+Categories=System;Security;Utility;
+StartupNotify=true
+Keywords=等保;等级保护;测评;Evaluation Assistant;
