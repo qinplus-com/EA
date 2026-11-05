@@ -59,7 +59,7 @@ def asset_icon(name):
 
 def back_about_btn(page):
     """各功能页统一的「返回」按钮：回到启动时的关于界面"""
-    b = QPushButton("← 返回")
+    b = QPushButton("返回")
     b.setObjectName("ghost")
     b.setCursor(Qt.PointingHandCursor)
     b.setToolTip("返回关于界面")
@@ -784,9 +784,6 @@ class HomePage(QWidget):
         hb.addWidget(title)
         hb.addWidget(sub)
         head.addLayout(hb, 1)
-        badge = QLabel("等保 2.0 / 3.0")
-        badge.setObjectName("badge")
-        head.addWidget(badge, 0, Qt.AlignTop)
         head.addWidget(back_about_btn(self), 0, Qt.AlignTop)
         v.addLayout(head)
 
@@ -1955,7 +1952,7 @@ class BaselineDialog(QDialog):
         self.setWindowTitle("安全基线 / CVE 数据")
         self.setWindowIcon(app_icon())
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.resize(660, 470)
+        self.resize(660, 560)
         v = QVBoxLayout(self)
         v.setSpacing(10)
 
@@ -1965,7 +1962,7 @@ class BaselineDialog(QDialog):
         v1.setSpacing(6)
         i = baseline.info()
         n_prod = len(baseline.load().get("products", {}))
-        loc = i["path"] if i["using_user"] else "程序内置（导入更新后保存至用户目录）"
+        loc = i["path"] + ("（用户更新版）" if i["using_user"] else "")
         info = QLabel("当前版本：%s（更新日期 %s，覆盖 %d 个产品，来源：%s）\n存储位置：%s" % (
             i["version"] or "?", i["updated"] or "?", n_prod, i["source"] or "-", loc))
         info.setWordWrap(True)
@@ -1998,9 +1995,11 @@ class BaselineDialog(QDialog):
         v2 = QVBoxLayout(g2)
         v2.setSpacing(6)
         ci = baseline.cve_info()
-        loc2 = ci["path"] if ci["using_user"] else "程序内置（导入更新后保存至用户目录）"
+        loc2 = ci["path"] + ("（用户更新版）" if ci["using_user"] else "")
+        _names = ci["names"].split("、") if ci["names"] else []
+        names_s = "、".join(_names[:8]) + (" 等 %d 个组件" % len(_names) if len(_names) > 8 else "")
         info2 = QLabel("当前库：%d 个组件 / %d 条版本区间 / %d 个 CVE\n覆盖组件：%s\n存储位置：%s" % (
-            ci["components"], ci["entries"], ci["cves"], ci["names"], loc2))
+            ci["components"], ci["entries"], ci["cves"], names_s, loc2))
         info2.setWordWrap(True)
         v2.addWidget(info2)
         tip2 = QLabel("判定规则：组件版本落入条目区间 [min, max] → 命中对应 CVE，在版本漏洞检查中列出。"
@@ -2067,7 +2066,7 @@ class BaselineDialog(QDialog):
                    else baseline.reset_cves_to_bundled)
 
     def _open_dir(self):
-        d = os.path.dirname(str(baseline.user_path()))
+        d = baseline.active_dir()
         os.makedirs(d, exist_ok=True)
         QDesktopServices.openUrl(QUrl.fromLocalFile(d))
 

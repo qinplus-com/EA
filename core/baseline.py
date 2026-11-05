@@ -41,6 +41,13 @@ def user_path():
     return Path.home() / ".ea_dengbao" / _DATA_FILE
 
 
+def active_dir():
+    """实际生效数据所在目录：用户更新版 > exe 同级 data/（打包版）> 内置"""
+    if user_path().exists() or cve_user_path().exists():
+        return str(user_path().parent)
+    return str(_bundled_path().parent)
+
+
 def _read(path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -65,8 +72,8 @@ def info():
     using_user = up.exists()
     return {"version": d.get("version", ""), "updated": d.get("updated", ""),
             "source": d.get("source", ""),
-            # path：当前实际生效的用户基线路径（仅在用用户基线时非空）
-            "path": str(up) if using_user else "",
+            # path：当前实际生效的基线文件完整路径
+            "path": str(up if using_user else _bundled_path()),
             # user_path：用户基线的目标位置（导入/更新后保存在此）
             "user_path": str(up),
             "using_user": using_user}
@@ -229,7 +236,7 @@ def cve_info():
     return {"components": len(comps), "entries": entries, "cves": n_cve,
             "names": "、".join(comps),
             "using_user": up.exists(),
-            "path": str(up) if up.exists() else "",
+            "path": str(up if up.exists() else _bundled_cve_path()),
             "user_path": str(up)}
 
 
