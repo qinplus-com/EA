@@ -6,6 +6,8 @@
 - Linux 版：**qinplus-dengbao**（GUI / 命令行 `qinplus-dengbao-cli`）
 - 当前版本：**V1.0**
 
+在线演示（不完全功能）：https://ea.qinplus.com
+
 ## 功能
 
 | 模块 | 说明 |
