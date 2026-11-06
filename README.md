@@ -62,6 +62,15 @@ sudo make uninstall      # 卸载
 
 安装时会自动检测图形桌面：若当前用户存在桌面目录（含中文「桌面」及 XDG 配置的自定义目录），会在桌面创建 `qinplus-dengbao.desktop` 快捷方式并标记为可信；纯服务器无桌面目录时自动跳过。DEB / RPM 包安装时同样会创建。
 
+安装后桌面上没有快捷方式时，手动执行一次即可（会自动识别桌面目录与图标）：
+
+```bash
+sudo sh /usr/share/qinplus-dengbao/install_desktop_shortcut.sh \
+    /usr/share/applications/qinplus-dengbao.desktop
+```
+
+也可直接从应用菜单搜索「勤加」启动。麒麟 / 统信桌面若提示「不受信任的启动器」，右键图标选择「允许启动」。
+
 如需在本机生成原生二进制 / RPM / DEB（需在 Linux 上执行）：
 
 ```bash
