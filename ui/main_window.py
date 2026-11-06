@@ -1985,7 +1985,7 @@ class BaselineDialog(QDialog):
         self.c_info.setWordWrap(True)
         v2.addWidget(self.c_info)
         tip2 = QLabel("判定规则：组件版本落入条目区间 [min, max] → 命中对应 CVE，在版本漏洞检查中列出。"
-                      "可导入厂商/内部数据源更新，更新后优先于内置库生效。")
+                      "可导入厂商/内部数据源更新，更新后直接覆盖 data/cve_db.json 生效。")
         tip2.setObjectName("muted")
         tip2.setWordWrap(True)
         v2.addWidget(tip2)
@@ -2025,22 +2025,20 @@ class BaselineDialog(QDialog):
         """刷新两份数据的版本/路径说明（更新后就地刷新，不关闭窗口）"""
         i = baseline.info()
         n_prod = len(baseline.load().get("products", {}))
-        if i["using_user"]:
-            loc = "生效（用户更新版）：%s\n内置（随安装包）：%s" % (i["path"], i["bundled_path"])
-        else:
-            loc = "生效（内置）：%s\n更新/导入后保存到：%s" % (i["path"], i["user_path"])
+        loc = "数据文件：%s" % i["path"]
+        if os.path.dirname(i["write_path"]) != os.path.dirname(i["path"]):
+            loc += "\n更新将写入：%s（程序目录不可写）" % i["write_path"]
         self.b_info.setText(
-            "当前版本：%s（更新日期 %s，覆盖 %d 个产品，来源：%s）\n数据位置：\n%s" % (
+            "当前版本：%s（更新日期 %s，覆盖 %d 个产品，来源：%s）\n%s" % (
                 i["version"] or "?", i["updated"] or "?", n_prod, i["source"] or "-", loc))
 
         ci = baseline.cve_info()
-        if ci["using_user"]:
-            loc2 = "生效（用户更新版）：%s\n内置（随安装包）：%s" % (ci["path"], ci["bundled_path"])
-        else:
-            loc2 = "生效（内置）：%s\n更新/导入后保存到：%s" % (ci["path"], ci["user_path"])
+        loc2 = "数据文件：%s" % ci["path"]
+        if os.path.dirname(ci["write_path"]) != os.path.dirname(ci["path"]):
+            loc2 += "\n更新将写入：%s（程序目录不可写）" % ci["write_path"]
         _names = ci["names"].split("、") if ci["names"] else []
         names_s = "、".join(_names[:8]) + (" 等 %d 个组件" % len(_names) if len(_names) > 8 else "")
-        self.c_info.setText("当前库：%d 个组件 / %d 条版本区间 / %d 个 CVE\n覆盖组件：%s\n数据位置：\n%s" % (
+        self.c_info.setText("当前库：%d 个组件 / %d 条版本区间 / %d 个 CVE\n覆盖组件：%s\n%s" % (
             ci["components"], ci["entries"], ci["cves"], names_s, loc2))
 
     def _done(self, fn):

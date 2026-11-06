@@ -1,8 +1,8 @@
 {
   "format": 1,
-  "version": "2026.11.02",
-  "updated": "2026-11-02",
-  "source": "内置离线基线（人工维护，可按需导入更新）",
+  "version": "2026.11.06",
+  "updated": "2026-11-06",
+  "source": "qinplus-daily",
   "products": {
     "windows": {
       "name": "Windows 操作系统",

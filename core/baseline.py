@@ -3,11 +3,14 @@
 
 - 版本基线：data/security_baseline.json（products 版本下限 + cves 修复版本）
 - CVE 漏洞库：data/cve_db.json（组件版本区间 → CVE 映射，供版本漏洞比对）
-- 用户更新后的文件保存在 ~/.ea_dengbao/，优先于内置生效
+- 读写同一个文件：解压版为 exe 同级 data/，源码运行为项目根 data/
+- 数据目录不可写时（如安装到 /usr/share），更新写入 ~/.ea_dengbao/ 作为回退
 - 支持从本地 JSON 文件导入，或从指定 URL 下载（需联网）
 """
 import json
+import os
 import re
+import shutil
 import sys
 import urllib.request
 from datetime import date as _date
@@ -16,6 +19,7 @@ from pathlib import Path
 _DATA_FILE = "security_baseline.json"
 _CVE_FILE = "cve_db.json"
 _UPDATE_BASE = "https://ea.qinplus.com"
+_migrated = False
 
 
 def default_url(kind="baseline"):
@@ -27,18 +31,41 @@ def default_url(kind="baseline"):
     return "%s/%s.%s.json" % (_UPDATE_BASE, name, _date.today().isoformat())
 
 
-def _bundled_path():
-    # 打包版优先使用 exe 同级 data/security_baseline.json（用户可见、可直接查看/编辑）
+def data_dir():
+    """数据目录：解压版为 exe 同级 data/，源码运行为项目根 data/"""
     if getattr(sys, "frozen", False):
-        p = Path(sys.executable).resolve().parent / "data" / _DATA_FILE
-        if p.exists():
-            return p
-    base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
-    return Path(base) / "data" / _DATA_FILE
+        return Path(sys.executable).resolve().parent / "data"
+    return Path(__file__).resolve().parent.parent / "data"
 
 
-def user_path():
-    return Path.home() / ".ea_dengbao" / _DATA_FILE
+def _builtin_dir():
+    """随安装包发布的内置数据目录（PyInstaller 解包目录 / 源码 data/）"""
+    base = getattr(sys, "_MEIPASS", None)
+    return (Path(base) / "data") if base else data_dir()
+
+
+def _paths(name):
+    """同一份数据的候选位置：数据目录 → 用户回退目录 → 内置目录（去重）"""
+    out = [data_dir() / name]
+    for p in (Path.home() / ".ea_dengbao" / name, _builtin_dir() / name):
+        if p not in out:
+            out.append(p)
+    return out
+
+
+def _writable_dir():
+    """更新写入位置：数据目录可写则直接覆盖 data/，否则回退 ~/.ea_dengbao/"""
+    d = data_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+        probe = d / ".write_test"
+        probe.write_text("", encoding="utf-8")
+        probe.unlink()
+        return d
+    except OSError:
+        u = Path.home() / ".ea_dengbao"
+        u.mkdir(parents=True, exist_ok=True)
+        return u
 
 
 def _read(path):
@@ -46,9 +73,46 @@ def _read(path):
         return json.load(f)
 
 
+def _first_existing(name):
+    for p in _paths(name):
+        if p.exists():
+            return p
+    return _paths(name)[0]
+
+
+def _migrate_legacy():
+    """旧版本把更新数据放在 ~/.ea_dengbao/，这里一次性合并回 data/ 并清理"""
+    legacy = Path.home() / ".ea_dengbao"
+    if not legacy.is_dir():
+        return
+    for name in (_DATA_FILE, _CVE_FILE):
+        u = legacy / name
+        if not u.exists():
+            continue
+        try:
+            target = _writable_dir() / name
+            if not target.exists():
+                shutil.copyfile(u, target)
+            elif name == _DATA_FILE:
+                if str(_read(u).get("updated", "")) > str(_read(target).get("updated", "")):
+                    shutil.copyfile(u, target)
+            u.unlink()
+        except (OSError, ValueError):
+            continue
+    try:
+        if not any(legacy.iterdir()):
+            legacy.rmdir()
+    except OSError:
+        pass
+
+
 def load():
-    """优先用户基线，其次内置基线；异常时回退内置。"""
-    for p in (user_path(), _bundled_path()):
+    """读取当前生效基线（数据目录优先，其次用户回退目录，最后内置）"""
+    global _migrated
+    if not _migrated:
+        _migrated = True
+        _migrate_legacy()
+    for p in _paths(_DATA_FILE):
         try:
             if p.exists():
                 data = _read(p)
@@ -61,17 +125,13 @@ def load():
 
 def info():
     d = load()
-    up = user_path()
-    using_user = up.exists()
+    path = _first_existing(_DATA_FILE)
+    write = _writable_dir() / _DATA_FILE
     return {"version": d.get("version", ""), "updated": d.get("updated", ""),
             "source": d.get("source", ""),
-            # path：当前实际生效的基线文件完整路径
-            "path": str(up if using_user else _bundled_path()),
-            # user_path：用户基线的目标位置（导入/更新后保存在此）
-            "user_path": str(up),
-            # bundled_path：程序内置基线位置（随安装包发布）
-            "bundled_path": str(_bundled_path()),
-            "using_user": using_user}
+            # path：当前生效的数据文件；write_path：更新/导入写入的位置
+            "path": str(path), "write_path": str(write),
+            "using_user": path != data_dir() / _DATA_FILE}
 
 
 def _vt(v):
@@ -180,38 +240,35 @@ def update_from_url(url, timeout=20):
 
 
 def reset_to_bundled():
-    p = user_path()
-    if p.exists():
-        p.unlink()
+    src = _builtin_dir() / _DATA_FILE
+    dst = _writable_dir() / _DATA_FILE
+    if src.exists() and src.resolve() != dst.resolve():
+        shutil.copyfile(src, dst)
+        return "已恢复为内置基线（版本 %s）" % load().get("version", "?")
+    u = Path.home() / ".ea_dengbao" / _DATA_FILE
+    if u.exists():
+        u.unlink()
     return "已恢复为内置基线"
 
 
-def _save(data):
-    p = user_path()
-    p.parent.mkdir(parents=True, exist_ok=True)
-    with open(p, "w", encoding="utf-8") as f:
+def _save(data, name=_DATA_FILE):
+    """写入当前数据目录（不可写时回退 ~/.ea_dengbao/），覆盖同名文件"""
+    p = _writable_dir() / name
+    tmp = p.with_name(p.name + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, p)
 
 
 # ---------------- CVE 漏洞库（cve_db.json） ----------------
 
-def _bundled_cve_path():
-    # 打包版优先 exe 同级 data/cve_db.json（用户可见、可编辑）
-    if getattr(sys, "frozen", False):
-        p = Path(sys.executable).resolve().parent / "data" / _CVE_FILE
-        if p.exists():
-            return p
-    base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
-    return Path(base) / "data" / _CVE_FILE
-
-
-def cve_user_path():
-    return Path.home() / ".ea_dengbao" / _CVE_FILE
-
-
 def load_cves():
-    """CVE 库：优先用户版，其次内置。返回 {组件键: [版本区间条目...]}"""
-    for p in (cve_user_path(), _bundled_cve_path()):
+    """CVE 库：读取当前生效文件（数据目录优先）。返回 {组件键: [版本区间条目...]}"""
+    global _migrated
+    if not _migrated:
+        _migrated = True
+        _migrate_legacy()
+    for p in _paths(_CVE_FILE):
         try:
             if p.exists():
                 data = _read(p)
@@ -227,14 +284,12 @@ def cve_info():
     comps = [k for k, v in d.items() if isinstance(v, list)]
     entries = sum(len(d[k]) for k in comps)
     n_cve = sum(len(e.get("cve", [])) for k in comps for e in d[k])
-    up = cve_user_path()
+    path = _first_existing(_CVE_FILE)
+    write = _writable_dir() / _CVE_FILE
     return {"components": len(comps), "entries": entries, "cves": n_cve,
             "names": "、".join(comps),
-            "using_user": up.exists(),
-            "path": str(up if up.exists() else _bundled_cve_path()),
-            "user_path": str(up),
-            # bundled_path：程序内置 CVE 库位置（随安装包发布）
-            "bundled_path": str(_bundled_cve_path())}
+            "path": str(path), "write_path": str(write),
+            "using_user": path != data_dir() / _CVE_FILE}
 
 
 def _validate_cves(data):
@@ -244,10 +299,7 @@ def _validate_cves(data):
 
 
 def _save_cves(data):
-    p = cve_user_path()
-    p.parent.mkdir(parents=True, exist_ok=True)
-    with open(p, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    _save(data, _CVE_FILE)
 
 
 def update_cves_from_file(src):
@@ -269,7 +321,12 @@ def update_cves_from_url(url, timeout=20):
 
 
 def reset_cves_to_bundled():
-    p = cve_user_path()
+    src = _builtin_dir() / _CVE_FILE
+    dst = _writable_dir() / _CVE_FILE
+    if src.exists() and src.resolve() != dst.resolve():
+        shutil.copyfile(src, dst)
+        return "已恢复为内置 CVE 库"
+    p = Path.home() / ".ea_dengbao" / _CVE_FILE
     if p.exists():
         p.unlink()
     return "已恢复为内置 CVE 库"
