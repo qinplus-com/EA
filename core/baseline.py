@@ -76,6 +76,8 @@ def info():
             "path": str(up if using_user else _bundled_path()),
             # user_path：用户基线的目标位置（导入/更新后保存在此）
             "user_path": str(up),
+            # bundled_path：程序内置基线位置（随安装包发布）
+            "bundled_path": str(_bundled_path()),
             "using_user": using_user}
 
 
@@ -237,7 +239,9 @@ def cve_info():
             "names": "、".join(comps),
             "using_user": up.exists(),
             "path": str(up if up.exists() else _bundled_cve_path()),
-            "user_path": str(up)}
+            "user_path": str(up),
+            # bundled_path：程序内置 CVE 库位置（随安装包发布）
+            "bundled_path": str(_bundled_cve_path())}
 
 
 def _validate_cves(data):

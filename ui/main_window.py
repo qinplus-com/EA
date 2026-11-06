@@ -1942,7 +1942,7 @@ class BaselineDialog(QDialog):
         self.setWindowTitle("安全基线 / CVE 数据")
         self.setWindowIcon(app_icon())
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.resize(660, 560)
+        self.resize(700, 640)
         v = QVBoxLayout(self)
         v.setSpacing(10)
 
@@ -1952,8 +1952,11 @@ class BaselineDialog(QDialog):
         v1.setSpacing(6)
         i = baseline.info()
         n_prod = len(baseline.load().get("products", {}))
-        loc = i["path"] + ("（用户更新版）" if i["using_user"] else "")
-        info = QLabel("当前版本：%s（更新日期 %s，覆盖 %d 个产品，来源：%s）\n存储位置：%s" % (
+        if i["using_user"]:
+            loc = "生效（用户更新版）：%s\n内置（随安装包）：%s" % (i["path"], i["bundled_path"])
+        else:
+            loc = "生效（内置）：%s\n更新/导入后保存到：%s" % (i["path"], i["user_path"])
+        info = QLabel("当前版本：%s（更新日期 %s，覆盖 %d 个产品，来源：%s）\n存储位置：\n%s" % (
             i["version"] or "?", i["updated"] or "?", n_prod, i["source"] or "-", loc))
         info.setWordWrap(True)
         v1.addWidget(info)
@@ -1985,10 +1988,13 @@ class BaselineDialog(QDialog):
         v2 = QVBoxLayout(g2)
         v2.setSpacing(6)
         ci = baseline.cve_info()
-        loc2 = ci["path"] + ("（用户更新版）" if ci["using_user"] else "")
+        if ci["using_user"]:
+            loc2 = "生效（用户更新版）：%s\n内置（随安装包）：%s" % (ci["path"], ci["bundled_path"])
+        else:
+            loc2 = "生效（内置）：%s\n更新/导入后保存到：%s" % (ci["path"], ci["user_path"])
         _names = ci["names"].split("、") if ci["names"] else []
         names_s = "、".join(_names[:8]) + (" 等 %d 个组件" % len(_names) if len(_names) > 8 else "")
-        info2 = QLabel("当前库：%d 个组件 / %d 条版本区间 / %d 个 CVE\n覆盖组件：%s\n存储位置：%s" % (
+        info2 = QLabel("当前库：%d 个组件 / %d 条版本区间 / %d 个 CVE\n覆盖组件：%s\n存储位置：\n%s" % (
             ci["components"], ci["entries"], ci["cves"], names_s, loc2))
         info2.setWordWrap(True)
         v2.addWidget(info2)

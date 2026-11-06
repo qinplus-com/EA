@@ -30,13 +30,16 @@ DAY="$(date +%F)"
 START="$(date -d "-${DAYS} days" +%FT%H:%M:%S.000Z 2>/dev/null || date -v-${DAYS}d +%FT%H:%M:%S.000Z)"
 END="$(date +%FT%H:%M:%S.000Z 2>/dev/null || date -u +%FT%H:%M:%S.000Z)"
 
-# 关注组件（与 cve_db.json 的键一致）→ NVD 关键字
+# 关注组件（与 data/cve_db.json 的键一致）→ NVD 关键字
 declare -A KW=(
-  [nginx]="nginx" [apache-httpd]="apache http server" [tomcat]="apache tomcat"
-  [iis]="microsoft iis" [openssl]="openssl" [openssh]="openssh"
-  [mysql]="oracle mysql" [mariadb]="mariadb" [postgresql]="postgresql"
-  [redis]="redis" [mongodb]="mongodb" [nodejs]="node.js" [php]="php"
-  [weblogic]="oracle weblogic" [struts2]="apache struts" [log4j]="apache log4j"
+  [nginx]="nginx"                    [apache-httpd]="apache http server"
+  [tomcat]="apache tomcat"           [openssl]="openssl"
+  [openssh]="openssh"                [glibc]="glibc"
+  [redis]="redis"                    [docker]="docker"
+  [kubernetes]="kubernetes"          [nodejs]="node.js"
+  [python]="python"                  [jenkins]="jenkins"
+  [mongodb]="mongodb"                [mysql]="oracle mysql"
+  [bileiwaf]="openresty"             [kernel-centos-7]="linux kernel"
 )
 
 echo "[$(date '+%F %T')] === 基线数据日更开始（$DAY） ==="
