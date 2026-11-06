@@ -76,7 +76,7 @@ def _cfg_text(key, default=""):
 
 
 def _report_title():
-    return _cfg_text("report_title", "勤加等保测评助手报告")
+    return _cfg_text("report_title", "等保测评报告")
 
 
 def _org_name():
