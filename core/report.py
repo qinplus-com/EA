@@ -22,13 +22,14 @@ _ANSWER_TEXT = {"conform": "符合", "partial": "部分符合",
                 "nonconform": "不符合", "na": "不适用"}
 
 _CSS = """
+*{box-sizing:border-box}
 body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;max-width:1000px;margin:0 auto;padding:40px 24px;color:#1e293b;background:#fff}
 h1{font-size:28px;border-bottom:3px solid #2563eb;padding-bottom:12px;color:#1e3a8a}
 h2{font-size:20px;margin-top:36px;color:#1e40af;border-left:4px solid #2563eb;padding-left:10px}
 h3{font-size:16px;margin-top:24px;color:#1e3a8a}
 h4{font-size:14px;margin:16px 0 6px;color:#334155}
-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
-th,td{border:1px solid #cbd5e1;padding:8px 10px;text-align:left;vertical-align:top}
+table{width:100%;max-width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+th,td{border:1px solid #cbd5e1;padding:8px 10px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
 th{background:#eff6ff;color:#1e40af}
 .badge{color:#fff;padding:2px 10px;border-radius:10px;font-size:12px;white-space:nowrap}
 .meta{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;margin:20px 0}
