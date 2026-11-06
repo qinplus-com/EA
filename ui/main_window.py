@@ -3707,13 +3707,13 @@ class MainWindow(QMainWindow):
         nv = QVBoxLayout(nav_wrap)
         nv.setContentsMargins(0, 0, 0, 14)
         nv.setSpacing(0)
-        # 导航栏顶部：循环播放的 logo 动画（替代静态图标 + 「等保自查」文字）
+        # 导航栏顶部：EA 图标（与网站/打包图标统一）
         logo_row = QHBoxLayout()
         logo_row.setContentsMargins(0, 16, 0, 8)
-        from ui.splash import LogoAnim
-        self.logo_anim = LogoAnim(size=48)
+        logo_lbl = QLabel()
+        logo_lbl.setPixmap(app_icon().pixmap(QSize(48, 48)))
         logo_row.addStretch(1)
-        logo_row.addWidget(self.logo_anim)
+        logo_row.addWidget(logo_lbl)
         logo_row.addStretch(1)
         nv.addLayout(logo_row)
         self.nav = QListWidget()

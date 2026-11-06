@@ -2,13 +2,13 @@
 """勤加等保测评助手 - 使用帮助内容（内嵌 HTML，Windows / Linux 桌面版通用）
 
 使用 QTextBrowser 渲染，仅使用其支持的基础 HTML 标签与少量内联样式。
-在线演示完整版：https://ea.qinplus.com/docs/使用文档.html
+在线演示完整版：https://ea.qinplus.com/docs/usage.html
 """
 
 HELP_HTML = """
 <h2>勤加等保测评助手 · 使用文档</h2>
 <p><b>版本 V1.0</b>　简称：测评助手（Evaluation Assistant）<br>
-在线演示：https://ea.qinplus.com　｜　HTML 版使用文档：https://ea.qinplus.com/docs/使用文档.html</p>
+在线演示：https://ea.qinplus.com　｜　HTML 版使用文档：https://ea.qinplus.com/docs/usage.html</p>
 <hr>
 
 <h3>一、产品简介</h3>
