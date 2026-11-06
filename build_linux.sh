@@ -81,6 +81,22 @@ if command -v gtk-update-icon-cache >/dev/null 2>&1; then
 fi
 # 创建数据目录
 mkdir -p /root/.ea_dengbao 2>/dev/null || true
+# 有图形桌面时，在安装者桌面创建快捷方式（纯服务器自动跳过）
+for u in "${SUDO_USER:-}" "$(logname 2>/dev/null || true)"; do
+    [ -n "$u" ] || continue
+    [ "$u" != "root" ] || continue
+    H="$(getent passwd "$u" 2>/dev/null | cut -d: -f6)"
+    [ -n "$H" ] && [ -d "$H" ] || continue
+    D="$(sudo -u "$u" xdg-user-dir DESKTOP 2>/dev/null || true)"
+    [ -n "$D" ] && [ -d "$D" ] || D="$H/Desktop"
+    [ -d "$D" ] || D="$H/桌面"
+    [ -d "$D" ] || continue
+    cp -f /usr/share/applications/qinplus-dengbao.desktop "$D/qinplus-dengbao.desktop" 2>/dev/null || continue
+    chmod 755 "$D/qinplus-dengbao.desktop" 2>/dev/null || true
+    chown "$u": "$D/qinplus-dengbao.desktop" 2>/dev/null || true
+    sudo -u "$u" gio set "$D/qinplus-dengbao.desktop" metadata::trusted true 2>/dev/null || true
+    break
+done
 exit 0
 EOFX
 chmod 755 "$DEB_ROOT/DEBIAN/postinst"

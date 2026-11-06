@@ -71,6 +71,9 @@ install:
 	@if command -v update-desktop-database >/dev/null 2>&1; then \
 	    update-desktop-database -q $(DESTDIR)$(APPDIR) 2>/dev/null || true; \
 	fi
+	@if [ -z "$(DESTDIR)" ]; then \
+	    sh packaging/linux/install_desktop_shortcut.sh "$(APPDIR)/$(NAME).desktop" || true; \
+	fi
 	@echo "安装完成："
 	@echo "  桌面版   : $(BINDIR)/$(NAME)"
 	@echo "  命令行版 : $(BINDIR)/$(NAME)-cli"

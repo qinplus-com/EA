@@ -53,12 +53,14 @@ tar -czf dist/qinplus-dengbao-1.0.tar.gz ...   # 或使用 make dist
 ```bash
 tar -xzf qinplus-dengbao-1.0.tar.gz
 cd qinplus-dengbao-1.0
-sudo apt install python3-pyqt5 python3-paramiko python3-docx   # 依赖（可选）
+python3 -m pip install -i https://mirrors.aliyun.com/pypi/simple/ PyQt5==5.14.2 paramiko python-docx   # 依赖（可选，详见下方常见问题）
 ./configure --prefix=/usr
 make
 sudo make install        # 安装 qinplus-dengbao（GUI）与 qinplus-dengbao-cli（命令行）
 sudo make uninstall      # 卸载
 ```
+
+安装时会自动检测图形桌面：若当前用户存在桌面目录（含中文「桌面」及 XDG 配置的自定义目录），会在桌面创建 `qinplus-dengbao.desktop` 快捷方式并标记为可信；纯服务器无桌面目录时自动跳过。DEB / RPM 包安装时同样会创建。
 
 如需在本机生成原生二进制 / RPM / DEB（需在 Linux 上执行）：
 
