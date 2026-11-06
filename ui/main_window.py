@@ -11,7 +11,7 @@ from datetime import datetime
 from PyQt5.QtCore import (Qt, QThread, pyqtSignal, QTimer, QPointF, QSize,
                           QUrl)
 from PyQt5.QtGui import (QFont, QColor, QIcon, QPainter, QPen, QPixmap,
-                         QDesktopServices, QFontMetrics)
+                         QDesktopServices, QFontMetrics, QTextOption)
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton,
     QStackedWidget, QListWidget, QListWidgetItem, QComboBox, QLineEdit,
@@ -731,7 +731,7 @@ class AboutPage(QWidget):
         foot.setObjectName("muted")
         foot.setOpenExternalLinks(True)
         foot_row.addWidget(foot, 1)
-        start_btn = QPushButton("开始测评 →")
+        start_btn = QPushButton("开始测评")
         start_btn.setMinimumHeight(36)
         start_btn.setCursor(Qt.PointingHandCursor)
         start_btn.setToolTip("进入检测范围，开始等保自查")
@@ -787,6 +787,7 @@ class HomePage(QWidget):
         hb.addWidget(sub)
         head.addLayout(hb, 1)
         head.addWidget(back_about_btn(self), 0, Qt.AlignTop)
+        head.addSpacing(26)  # 与关于页「开始测评」按钮右边界对齐
         v.addLayout(head)
 
         # ---------- 选择检测范围 + 等保级别 + 批量导入入口 ----------
@@ -1322,7 +1323,7 @@ class HomePage(QWidget):
             return
         n = len(cards)
         # 页面左右边距 + 卡片间距
-        avail = max(320, self.width() - 40 - 8 * (n - 1))
+        avail = max(320, self.width() - 124 - 8 * (n - 1))
         w = int(avail / n)
         for card in cards.values():
             card.apply_scale(w)
@@ -1950,16 +1951,9 @@ class BaselineDialog(QDialog):
         g1 = QGroupBox("版本基线（security_baseline.json）")
         v1 = QVBoxLayout(g1)
         v1.setSpacing(6)
-        i = baseline.info()
-        n_prod = len(baseline.load().get("products", {}))
-        if i["using_user"]:
-            loc = "生效（用户更新版）：%s\n内置（随安装包）：%s" % (i["path"], i["bundled_path"])
-        else:
-            loc = "生效（内置）：%s\n更新/导入后保存到：%s" % (i["path"], i["user_path"])
-        info = QLabel("当前版本：%s（更新日期 %s，覆盖 %d 个产品，来源：%s）\n存储位置：\n%s" % (
-            i["version"] or "?", i["updated"] or "?", n_prod, i["source"] or "-", loc))
-        info.setWordWrap(True)
-        v1.addWidget(info)
+        self.b_info = QLabel("")
+        self.b_info.setWordWrap(True)
+        v1.addWidget(self.b_info)
         tip1 = QLabel("判定规则：被测组件版本低于 products 下限 → 低于基线，报告中标注整改。")
         tip1.setObjectName("muted")
         tip1.setWordWrap(True)
@@ -1987,17 +1981,9 @@ class BaselineDialog(QDialog):
         g2 = QGroupBox("CVE 漏洞库（cve_db.json）")
         v2 = QVBoxLayout(g2)
         v2.setSpacing(6)
-        ci = baseline.cve_info()
-        if ci["using_user"]:
-            loc2 = "生效（用户更新版）：%s\n内置（随安装包）：%s" % (ci["path"], ci["bundled_path"])
-        else:
-            loc2 = "生效（内置）：%s\n更新/导入后保存到：%s" % (ci["path"], ci["user_path"])
-        _names = ci["names"].split("、") if ci["names"] else []
-        names_s = "、".join(_names[:8]) + (" 等 %d 个组件" % len(_names) if len(_names) > 8 else "")
-        info2 = QLabel("当前库：%d 个组件 / %d 条版本区间 / %d 个 CVE\n覆盖组件：%s\n存储位置：\n%s" % (
-            ci["components"], ci["entries"], ci["cves"], names_s, loc2))
-        info2.setWordWrap(True)
-        v2.addWidget(info2)
+        self.c_info = QLabel("")
+        self.c_info.setWordWrap(True)
+        v2.addWidget(self.c_info)
         tip2 = QLabel("判定规则：组件版本落入条目区间 [min, max] → 命中对应 CVE，在版本漏洞检查中列出。"
                       "可导入厂商/内部数据源更新，更新后优先于内置库生效。")
         tip2.setObjectName("muted")
@@ -2025,6 +2011,7 @@ class BaselineDialog(QDialog):
         row = QHBoxLayout()
         b_open = QPushButton("打开存储目录")
         b_open.setObjectName("ghost")
+        b_open.setToolTip("打开当前生效数据文件所在的目录")
         b_open.clicked.connect(self._open_dir)
         b_close = QPushButton("关闭")
         b_close.clicked.connect(self.accept)
@@ -2032,6 +2019,29 @@ class BaselineDialog(QDialog):
         row.addStretch(1)
         row.addWidget(b_close)
         v.addLayout(row)
+        self._refresh_info()
+
+    def _refresh_info(self):
+        """刷新两份数据的版本/路径说明（更新后就地刷新，不关闭窗口）"""
+        i = baseline.info()
+        n_prod = len(baseline.load().get("products", {}))
+        if i["using_user"]:
+            loc = "生效（用户更新版）：%s\n内置（随安装包）：%s" % (i["path"], i["bundled_path"])
+        else:
+            loc = "生效（内置）：%s\n更新/导入后保存到：%s" % (i["path"], i["user_path"])
+        self.b_info.setText(
+            "当前版本：%s（更新日期 %s，覆盖 %d 个产品，来源：%s）\n数据位置：\n%s" % (
+                i["version"] or "?", i["updated"] or "?", n_prod, i["source"] or "-", loc))
+
+        ci = baseline.cve_info()
+        if ci["using_user"]:
+            loc2 = "生效（用户更新版）：%s\n内置（随安装包）：%s" % (ci["path"], ci["bundled_path"])
+        else:
+            loc2 = "生效（内置）：%s\n更新/导入后保存到：%s" % (ci["path"], ci["user_path"])
+        _names = ci["names"].split("、") if ci["names"] else []
+        names_s = "、".join(_names[:8]) + (" 等 %d 个组件" % len(_names) if len(_names) > 8 else "")
+        self.c_info.setText("当前库：%d 个组件 / %d 条版本区间 / %d 个 CVE\n覆盖组件：%s\n数据位置：\n%s" % (
+            ci["components"], ci["entries"], ci["cves"], names_s, loc2))
 
     def _done(self, fn):
         try:
@@ -2039,8 +2049,8 @@ class BaselineDialog(QDialog):
         except Exception as e:
             QMessageBox.warning(self, "更新失败", str(e))
             return
+        self._refresh_info()   # 就地刷新版本与路径，保持窗口打开
         QMessageBox.information(self, "完成", msg)
-        self.accept()
 
     def _import(self, kind):
         path, _ = QFileDialog.getOpenFileName(self, "选择数据文件", "", "JSON 文件 (*.json)")
@@ -2062,9 +2072,10 @@ class BaselineDialog(QDialog):
                    else baseline.reset_cves_to_bundled)
 
     def _open_dir(self):
-        d = baseline.active_dir()
-        os.makedirs(d, exist_ok=True)
-        QDesktopServices.openUrl(QUrl.fromLocalFile(d))
+        """打开当前生效数据文件所在的目录（用户更新版在 ~/.ea_dengbao，否则为程序自带 data/）"""
+        d = os.path.dirname(baseline.info()["path"])
+        if os.path.isdir(d):
+            QDesktopServices.openUrl(QUrl.fromLocalFile(d))
 
 
 # ---------------- 技术检测页 ----------------
@@ -2100,6 +2111,7 @@ class CheckPage(QWidget):
         top.addWidget(self.run_btn)
         top.addWidget(self.stop_btn)
         top.addWidget(back_about_btn(self))
+        top.addSpacing(26)  # 与关于页「开始测评」按钮右边界对齐
         v.addLayout(top)
 
         # —— 目标机器横幅（醒目红/黄底，让用户知道在检测谁 ——
@@ -2324,6 +2336,7 @@ class QuizPage(QWidget):
         head.addWidget(self.clear_draft_btn)
         head.addWidget(self.save_btn)
         head.addWidget(back_about_btn(self))
+        head.addSpacing(26)  # 与关于页「开始测评」按钮右边界对齐
         outer.addLayout(head)
 
         self.scroll = QScrollArea()
@@ -2638,6 +2651,7 @@ class ReportPage(QWidget):
                   self.batch_btn, self.pdf_btn, self.word_btn, self.html_btn):
             top.addWidget(b)
         top.addWidget(back_about_btn(self))
+        top.addSpacing(26)  # 与关于页「开始测评」按钮右边界对齐
         v.addLayout(top)
 
         # 内嵌预览区
@@ -3046,6 +3060,7 @@ class HistoryPage(QWidget):
         head.addWidget(self.cmp_btn)
         head.addWidget(self.del_btn)
         head.addWidget(back_about_btn(self))
+        head.addSpacing(26)  # 与关于页「开始测评」按钮右边界对齐
         v.addLayout(head)
 
         # 得分趋势图（最近 20 次）
@@ -4070,6 +4085,10 @@ class MainWindow(QMainWindow):
         v.setContentsMargins(12, 12, 12, 12)
         browser = QTextBrowser()
         browser.setOpenExternalLinks(True)
+        # 关闭横向滚动条并允许代码块折行，避免底部出现多余的横向滚动条
+        browser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        browser.setWordWrapMode(QTextOption.WrapAtWordBoundaryOrAnywhere)
+        browser.document().setDefaultStyleSheet("pre{white-space:pre-wrap;}")
         browser.setHtml(HELP_HTML)
         v.addWidget(browser, 1)
         row = QHBoxLayout()

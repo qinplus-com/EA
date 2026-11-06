@@ -41,13 +41,6 @@ def user_path():
     return Path.home() / ".ea_dengbao" / _DATA_FILE
 
 
-def active_dir():
-    """实际生效数据所在目录：用户更新版 > exe 同级 data/（打包版）> 内置"""
-    if user_path().exists() or cve_user_path().exists():
-        return str(user_path().parent)
-    return str(_bundled_path().parent)
-
-
 def _read(path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
