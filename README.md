@@ -43,8 +43,29 @@ python cli.py --help    # 命令行
 python build_windows.py
 #   产物：dist/勤加等保测评助手V1.0_windows.zip
 
-# Linux：RPM / DEB / 源码 tar.xz
-./build_linux.sh
+# Linux 源码发行包（含源码 + 基线数据，可在任意平台生成）
+#   产物：dist/qinplus-dengbao-1.0.tar.gz
+tar -czf dist/qinplus-dengbao-1.0.tar.gz ...   # 或使用 make dist
+```
+
+### Linux 安装（麒麟 Kylin / 统信 UOS / Deepin / Ubuntu）
+
+```bash
+tar -xzf qinplus-dengbao-1.0.tar.gz
+cd qinplus-dengbao-1.0
+sudo apt install python3-pyqt5 python3-paramiko python3-docx   # 依赖（可选）
+./configure --prefix=/usr
+make
+sudo make install        # 安装 qinplus-dengbao（GUI）与 qinplus-dengbao-cli（命令行）
+sudo make uninstall      # 卸载
+```
+
+如需在本机生成原生二进制 / RPM / DEB（需在 Linux 上执行）：
+
+```bash
+./build_linux.sh         # PyInstaller 独立可执行文件 + .deb
+make rpm                 # RPM 安装包
+make deb                 # DEB 安装包
 ```
 
 ## 目录结构
