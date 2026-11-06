@@ -4035,6 +4035,23 @@ class MainWindow(QMainWindow):
             "<p style='color:#6f8f7c;'>内蒙古勤加软件有限公司　　<a href='https://qinplus.com'>qinplus.com</a></p>"
             % (APP_NAME, APP_VERSION, APP_SHORT, APP_EN, APP_DEMO, APP_DEMO))
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        # 样式表 polish 完成后才知道按钮真实行高，延后一帧做对齐
+        if not getattr(self, "_nav_aligned", False):
+            self._nav_aligned = True
+            QTimer.singleShot(0, self._align_nav_rows)
+
+    def _align_nav_rows(self):
+        """把顶部导航项行高对齐到底部菜单，保证侧栏两处行距一致"""
+        btns = (self.settings_btn, self.baseline_btn, self.help_btn,
+                self.logs_btn, self.about_btn)
+        h = max(b.sizeHint().height() for b in btns)
+        for b in btns:
+            b.setFixedHeight(h)
+        for i in range(self.nav.count()):
+            self.nav.item(i).setSizeHint(QSize(0, h))
+
     def _goto_about_page(self):
         """返回启动时的关于界面（清空左侧导航选中态）"""
         self.nav.blockSignals(True)
