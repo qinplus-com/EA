@@ -111,13 +111,30 @@ def _logo_src():
         return path.replace("\\", "/")
 
 
+def _logo_size(max_h=40, max_w=180):
+    """按原图比例缩放 Logo，返回 (宽, 高)；读取失败返回 None"""
+    path = _logo_path()
+    try:
+        from PIL import Image
+        with Image.open(path) as im:
+            w, h = im.size
+    except Exception:
+        return None
+    if w <= 0 or h <= 0:
+        return None
+    scale = min(float(max_h) / h, float(max_w) / w)
+    return max(1, int(round(w * scale))), max(1, int(round(h * scale)))
+
+
 def _title_html():
-    """报告抬头：可配置标题 + 可选 Logo（宽 48px）"""
+    """报告抬头：可配置标题 + 可选 Logo（等比缩放，最高 40px、最宽 180px）"""
     logo = _logo_src()
     if logo:
-        return ('<h1><img src="%s" width="48" height="48" '
+        size = _logo_size()
+        attr = ' width="%d" height="%d"' % size if size else ' height="40"'
+        return ('<h1><img src="%s"%s '
                 'style="vertical-align:middle;margin-right:10px">%s</h1>'
-                % (_e(logo), _e(_report_title())))
+                % (_e(logo), attr, _e(_report_title())))
     return "<h1>%s</h1>" % _e(_report_title())
 
 
@@ -417,7 +434,8 @@ def _add_docx_logo(doc):
         return
     try:
         from docx.shared import Inches
-        doc.add_picture(logo, width=Inches(0.5))
+        # 只给高度，宽度按原图比例自动换算，避免横向拉伸
+        doc.add_picture(logo, height=Inches(0.4))
     except Exception:
         # Logo 损坏/格式不支持时不影响报告主体导出
         pass
