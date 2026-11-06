@@ -23,7 +23,7 @@ DEFAULT_REPORT_DIR = _default_report_dir()
 
 DEFAULTS = {
     "report_dir": DEFAULT_REPORT_DIR,
-    "report_title": "等保自查报告",
+    "report_title": "勤加等保测评助手报告",
     "org_name": "内蒙古勤加软件有限公司",
     "logo_path": "",
     "snmp_community": "public",
@@ -54,6 +54,9 @@ def load():
                     cfg[k] = v
     except Exception:
         pass
+    # 旧版默认标题升级为产品名标题（用户自定义过的标题保持不变）
+    if cfg.get("report_title") == "等保自查报告":
+        cfg["report_title"] = DEFAULTS["report_title"]
     _cache = cfg
     return dict(cfg)
 

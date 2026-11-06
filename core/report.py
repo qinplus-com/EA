@@ -76,7 +76,7 @@ def _cfg_text(key, default=""):
 
 
 def _report_title():
-    return _cfg_text("report_title", "等保自查报告")
+    return _cfg_text("report_title", "勤加等保测评助手报告")
 
 
 def _org_name():
@@ -381,7 +381,7 @@ def build_html(summary, quiz_items=None, quiz_answers=None, print_friendly=False
         (summary.manual_count, "需人工核查", "#8b5cf6"),
     ], print_friendly)
 
-    footer_text = ("本报告由「等保自查工具」自动生成 · 仅用于内部等保测试，"
+    footer_text = ("本报告由「勤加等保测评助手」自动生成 · 仅用于内部等保测试，"
                    "不作为等保评审依据 · 生成时间 %s" % now)
     org = _org_name()
     if org:
@@ -394,7 +394,7 @@ def build_html(summary, quiz_items=None, quiz_answers=None, print_friendly=False
 <title>{title} - {target}</title>
 <style>{css}</style></head><body>
 {title_html}
-<div class="notice">使用范围说明：本报告由自动化自查工具生成，<b>仅用于内部等保测试与整改参考，不作为等保评审/测评依据</b>。检测结论需结合人工核查确认。</div>
+<div class="notice">使用范围说明：本报告由勤加等保测评助手生成，<b>仅用于内部等保测试与整改参考，不作为等保评审/测评依据</b>。检测结论需结合人工核查确认。</div>
 {meta}
 {score}
 {cards}
@@ -486,7 +486,7 @@ def _add_docx_quiz(doc, quiz_items, quiz_answers, heading):
 
 def _add_docx_footer(doc, results, now):
     org = _org_name()
-    tail = "本报告由「等保自查工具」自动生成，仅用于内部等保测试，不作为等保评审依据。"
+    tail = "本报告由「勤加等保测评助手」自动生成，仅用于内部等保测试，不作为等保评审依据。"
     if org:
         tail = "编制单位：%s\n%s" % (org, tail)
     doc.add_paragraph(tail)
@@ -506,7 +506,7 @@ def export_docx(summary, path, quiz_items=None, quiz_answers=None):
     doc.add_heading(_report_title(), 0)
     notice = doc.add_paragraph()
     nr = notice.add_run(
-        "使用范围说明：本报告由自动化自查工具生成，仅用于内部等保测试与整改参考，"
+        "使用范围说明：本报告由勤加等保测评助手生成，仅用于内部等保测试与整改参考，"
         "不作为等保评审/测评依据。检测结论需结合人工核查确认。")
     nr.italic = True
     nr.font.size = Pt(9)
@@ -712,7 +712,7 @@ def build_batch_html(items, quiz_items=None, quiz_answers=None, print_friendly=F
                            heading="三、管理要求问卷评估结果",
                            print_friendly=print_friendly)
 
-    footer_text = ("本报告由「等保自查工具」自动生成 · 仅用于内部等保测试，"
+    footer_text = ("本报告由「勤加等保测评助手」自动生成 · 仅用于内部等保测试，"
                    "不作为等保评审依据 · 生成时间 %s" % now)
     org = _org_name()
     if org:
@@ -728,7 +728,7 @@ def build_batch_html(items, quiz_items=None, quiz_answers=None, print_friendly=F
 <title>{title} - 批量汇总</title>
 <style>{css}</style></head><body>
 {title_html}
-<div class="notice">使用范围说明：本报告由自动化自查工具批量生成，<b>仅用于内部等保测试与整改参考，不作为等保评审/测评依据</b>。检测结论需结合人工核查确认。</div>
+<div class="notice">使用范围说明：本报告由勤加等保测评助手批量生成，<b>仅用于内部等保测试与整改参考，不作为等保评审/测评依据</b>。检测结论需结合人工核查确认。</div>
 <h2>一、批量检测汇总</h2>
 {cards}
 <h3>1.1 目标统计</h3>
@@ -761,7 +761,7 @@ def _export_batch_docx(items, path, quiz_items=None, quiz_answers=None):
     _add_docx_logo(doc)
     doc.add_heading("%s（批量汇总）" % _report_title(), 0)
     doc.add_paragraph(
-        "使用范围说明：本报告由自动化自查工具批量生成，仅用于内部等保测试与整改参考，"
+        "使用范围说明：本报告由勤加等保测评助手批量生成，仅用于内部等保测试与整改参考，"
         "不作为等保评审/测评依据。检测结论需结合人工核查确认。")
     doc.add_paragraph(
         "目标总数：%d    平均得分：%.1f / 100（%s）    达标（≥75分）：%d    待整改：%d\n"
