@@ -54,6 +54,7 @@ install:
 	-find $(DESTDIR)$(LIBDIR) -name '*.pyc' -delete 2>/dev/null || true
 	cp -a data/. $(DESTDIR)$(LIBDIR)/data/
 	cp -a assets/. $(DESTDIR)$(LIBDIR)/assets/
+	install -m 755 packaging/linux/install_desktop_shortcut.sh $(DESTDIR)$(LIBDIR)/
 	install -d $(DESTDIR)$(BINDIR)
 	sed -e 's|@LIBDIR@|$(LIBDIR)|g' -e 's|@PYTHON@|$(PYTHON)|g' \
 	    packaging/linux/qinplus-dengbao.in > $(DESTDIR)$(BINDIR)/$(NAME)
@@ -70,6 +71,9 @@ install:
 	fi
 	@if command -v update-desktop-database >/dev/null 2>&1; then \
 	    update-desktop-database -q $(DESTDIR)$(APPDIR) 2>/dev/null || true; \
+	fi
+	@if [ -z "$(DESTDIR)" ] && command -v gtk-update-icon-cache >/dev/null 2>&1; then \
+	    gtk-update-icon-cache -q -t -f $(DATADIR)/icons/hicolor 2>/dev/null || true; \
 	fi
 	@if [ -z "$(DESTDIR)" ]; then \
 	    sh packaging/linux/install_desktop_shortcut.sh "$(APPDIR)/$(NAME).desktop" || true; \
