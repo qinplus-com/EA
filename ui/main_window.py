@@ -9,7 +9,7 @@ import webbrowser
 from datetime import datetime
 
 from PyQt5.QtCore import (Qt, QThread, pyqtSignal, QTimer, QPointF, QSize,
-                          QUrl)
+                          QRect, QUrl)
 from PyQt5.QtGui import (QFont, QColor, QIcon, QPainter, QPen, QPixmap,
                          QDesktopServices, QFontMetrics, QTextOption)
 from PyQt5.QtWidgets import (
@@ -95,7 +95,8 @@ QComboBox:focus, QLineEdit:focus, QSpinBox:focus { border:1px solid #2f9c3a; }
 QComboBox QAbstractItemView { background:#131b16; color:#ffffff; selection-background-color:#2f9c3a; selection-color:#ffffff; border:none; }
 QProgressBar { background:#131b16; border:none; border-radius:7px; height:14px; text-align:center; color:#ffffff; }
 QProgressBar::chunk { background:#2f9c3a; border-radius:7px; }
-QTreeWidget, QTableWidget, QListWidget { background:#0f1512; border:none; border-radius:8px; gridline-color:#161e19; }
+QTreeWidget, QTableWidget, QListWidget { background:#0f1512; border:none; border-radius:8px; gridline-color:#1b2620; }
+QTreeWidget { alternate-background-color:#131c16; }
 QHeaderView::section { background:#131b16; color:#c9d3cc; padding:8px; border:none; }
 QGroupBox { border:none; margin-top:14px; padding-top:14px; font-weight:bold; color:#c9d3cc; }
 QGroupBox::title { subcontrol-origin:margin; left:12px; padding:0 6px; background:#0b100d; }
@@ -114,24 +115,24 @@ QLabel#pageSub { color:#9aa39c; border:none; }
 QLabel#noticeBar { background:#121712; color:#b9a67a; padding:7px 18px; }
 QFrame#flow { background:#111814; border:none; border-radius:8px; }
 QLabel#flowText { color:#9aa39c; }
-QLabel#statCard { background:#111814; border:none; border-radius:8px; color:#ffffff; padding:8px 12px; }
+QLabel#statCard { background:#111814; border:1px solid #1e2a23; border-radius:8px; color:#ffffff; padding:8px 12px; }
 QPushButton#aboutLink { background:transparent; border:none; color:#9aa39c; text-align:left;
     padding:9px 18px 3px 18px; min-height:20px; }
 QPushButton#aboutLink:hover { color:#ffffff; }
 QScrollArea { border:none; }
 QPlainTextEdit { background:#0f1512; border:none; border-radius:8px; color:#ffffff; padding:8px; }
-QFrame#scopeCard { background:transparent; border:1px solid #26312a; border-radius:10px; }
-QFrame#scopeCard:hover { border-color:#2f9c3a; }
-QFrame#scopeCard[selected="true"] { background:transparent; border:2px solid #2f9c3a; }
+QFrame#scopeCard { background:#101812; border:1px solid #2c3b31; border-radius:10px; }
+QFrame#scopeCard:hover { border-color:#2f9c3a; background:#13201a; }
+QFrame#scopeCard[selected="true"] { background:#12251a; border:2px solid #2f9c3a; }
 QFrame#scopeCard QLabel#cardIcon { font-size:24px; background:transparent; border:none; }
 QFrame#scopeCard QLabel#cardTitle { font-weight:700; color:#ffffff; background:transparent; border:none; }
 QFrame#scopeCard QLabel#cardTip { color:#9aa39c; background:transparent; border:none; }
 QFrame#scopeCard[selected="true"] QLabel#cardTitle { color:#7bc043; }
 QFrame#scopeCard[selected="true"] QLabel#cardTip { color:#c9d3cc; }
 QLabel#badge { background:#141c17; color:#c9d3cc; border:none; border-radius:12px; padding:6px 14px; }
-QFrame#panel { background:#111814; border:none; border-radius:8px; }
+QFrame#panel { background:#111814; border:1px solid #1e2a23; border-radius:8px; }
 QLabel#verLine { color:#7bc043; font-weight:600; border:none; }
-QFrame#featCard { background:#0f1512; border:none; border-radius:10px; }
+QFrame#featCard { background:#121a15; border:1px solid #222f27; border-radius:10px; }
 QFrame#featCard QLabel#featTitle { font-weight:700; color:#ffffff; background:transparent; border:none; }
 QFrame#featCard QLabel#featDesc { color:#9aa39c; background:transparent; border:none; }
 QFrame#quizItem { background:transparent; border:1px solid #26312a; border-radius:8px; }
@@ -168,6 +169,7 @@ QComboBox QAbstractItemView { background:#ffffff; color:#111111; selection-backg
 QProgressBar { background:#ecf0ed; border:none; border-radius:7px; height:14px; text-align:center; color:#111111; }
 QProgressBar::chunk { background:#2f9c3a; border-radius:7px; }
 QTreeWidget, QTableWidget, QListWidget { background:#ffffff; border:none; border-radius:8px; gridline-color:#eef0ee; }
+QTreeWidget { alternate-background-color:#f7f9f7; }
 QHeaderView::section { background:#f5f7f5; color:#333333; padding:8px; border:none; }
 QGroupBox { border:none; margin-top:14px; padding-top:14px; font-weight:bold; color:#333333; }
 QGroupBox::title { subcontrol-origin:margin; left:12px; padding:0 6px; background:#ffffff; }
@@ -192,18 +194,18 @@ QPushButton#aboutLink { background:transparent; border:none; color:#5f6b62; text
 QPushButton#aboutLink:hover { color:#111111; }
 QScrollArea { border:none; }
 QPlainTextEdit { background:#ffffff; border:none; border-radius:8px; color:#111111; padding:8px; }
-QFrame#scopeCard { background:transparent; border:1px solid #dbe3dd; border-radius:10px; }
-QFrame#scopeCard:hover { border-color:#2f9c3a; }
-QFrame#scopeCard[selected="true"] { background:transparent; border:2px solid #2f9c3a; }
+QFrame#scopeCard { background:#ffffff; border:1px solid #dbe3dd; border-radius:10px; }
+QFrame#scopeCard:hover { border-color:#2f9c3a; background:#f7fbf8; }
+QFrame#scopeCard[selected="true"] { background:#f2faf4; border:2px solid #2f9c3a; }
 QFrame#scopeCard QLabel#cardIcon { font-size:24px; background:transparent; border:none; }
 QFrame#scopeCard QLabel#cardTitle { font-weight:700; color:#111111; background:transparent; border:none; }
 QFrame#scopeCard QLabel#cardTip { color:#5f6b62; background:transparent; border:none; }
 QFrame#scopeCard[selected="true"] QLabel#cardTitle { color:#2f9c3a; }
 QFrame#scopeCard[selected="true"] QLabel#cardTip { color:#333333; }
 QLabel#badge { background:#f2f5f2; color:#333333; border:none; border-radius:12px; padding:6px 14px; }
-QFrame#panel { background:#f5f7f5; border:none; border-radius:8px; }
+QFrame#panel { background:#f5f7f5; border:1px solid #e6ece7; border-radius:8px; }
 QLabel#verLine { color:#2f9c3a; font-weight:600; border:none; }
-QFrame#featCard { background:#f5f7f5; border:none; border-radius:10px; }
+QFrame#featCard { background:#f7faf8; border:1px solid #e4ece6; border-radius:10px; }
 QFrame#featCard QLabel#featTitle { font-weight:700; color:#111111; background:transparent; border:none; }
 QFrame#featCard QLabel#featDesc { color:#5f6b62; background:transparent; border:none; }
 QFrame#quizItem { background:transparent; border:1px solid #dbe3dd; border-radius:8px; }
@@ -2135,11 +2137,26 @@ class CheckPage(QWidget):
 
         self.tree = QTreeWidget()
         self.tree.setHeaderLabels(["检测项", "结论", "检测结果 / 证据", "整改建议"])
+        self.tree.setWordWrap(True)          # 长文本在列内换行，不再截断
+        self.tree.setTextElideMode(Qt.ElideNone)
+        self.tree.setAlternatingRowColors(True)
+        hdr = self.tree.header()
+        hdr.setSectionResizeMode(0, QHeaderView.Interactive)
+        hdr.setSectionResizeMode(1, QHeaderView.Fixed)
+        hdr.setSectionResizeMode(2, QHeaderView.Stretch)
+        hdr.setSectionResizeMode(3, QHeaderView.Interactive)
         self.tree.setColumnWidth(0, 300)
         self.tree.setColumnWidth(1, 100)
-        self.tree.setColumnWidth(2, 380)
+        self.tree.setColumnWidth(3, 300)
         self.tree.itemSelectionChanged.connect(self._hint)
         v.addWidget(self.tree, 1)
+
+        # 列宽变化后重新计算换行高度（防抖），保证长文本完整显示
+        self._fit_timer = QTimer(self)
+        self._fit_timer.setSingleShot(True)
+        self._fit_timer.setInterval(120)
+        self._fit_timer.timeout.connect(self._fit_all_rows)
+        self.tree.header().sectionResized.connect(lambda *_: self._fit_timer.start())
 
         self.detail = QLabel("点击检测项查看完整信息")
         self.detail.setObjectName("muted")
@@ -2255,7 +2272,20 @@ class CheckPage(QWidget):
                                    (r.evidence or "")[:400], r.suggestion])
         w.setForeground(1, QColor(color))
         w.setData(0, Qt.UserRole, r)
+        self._fit_row(w)
         self._item_widgets[r.item_id] = w
+
+    def _fit_row(self, w):
+        """按当前列宽计算「检测结果/整改建议」的换行高度（QTreeWidget 默认不自动换行）"""
+        fm = self.tree.fontMetrics()
+        for col in (2, 3):
+            cw = max(80, self.tree.columnWidth(col) - 12)
+            rect = fm.boundingRect(QRect(0, 0, cw, 0), Qt.TextWordWrap, w.text(col))
+            w.setSizeHint(col, QSize(cw, rect.height() + 8))
+
+    def _fit_all_rows(self):
+        for w in self._item_widgets.values():
+            self._fit_row(w)
 
     def _hint(self):
         items = self.tree.selectedItems()

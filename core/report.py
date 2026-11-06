@@ -112,8 +112,8 @@ def _logo_src():
         return path.replace("\\", "/")
 
 
-def _logo_size(max_h=40, max_w=180):
-    """按原图比例缩放 Logo，返回 (宽, 高)；读取失败返回 None"""
+def _logo_size(default_h=40, max_w=360):
+    """Logo 统一等比缩放到默认高度 40px（超出最大宽度时按宽度收缩），返回 (宽, 高)"""
     path = _logo_path()
     try:
         from PIL import Image
@@ -123,12 +123,14 @@ def _logo_size(max_h=40, max_w=180):
         return None
     if w <= 0 or h <= 0:
         return None
-    scale = min(float(max_h) / h, float(max_w) / w)
+    scale = float(default_h) / h
+    if w * scale > max_w:
+        scale = float(max_w) / w
     return max(1, int(round(w * scale))), max(1, int(round(h * scale)))
 
 
 def _title_html():
-    """报告抬头：可配置标题 + 可选 Logo（等比缩放，最高 40px、最宽 180px）"""
+    """报告抬头：可配置标题 + 可选 Logo（等比缩放到默认高度）"""
     logo = _logo_src()
     if logo:
         size = _logo_size()
@@ -435,8 +437,8 @@ def _add_docx_logo(doc):
         return
     try:
         from docx.shared import Inches
-        # 只给高度，宽度按原图比例自动换算，避免横向拉伸
-        doc.add_picture(logo, height=Inches(0.4))
+        # 与 HTML/PDF 一致：统一等比缩放到默认高度 40px（96dpi 下约 0.42 英寸）
+        doc.add_picture(logo, height=Inches(40 / 96.0))
     except Exception:
         # Logo 损坏/格式不支持时不影响报告主体导出
         pass
