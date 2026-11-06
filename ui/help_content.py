@@ -38,7 +38,13 @@ sudo rpm -ivh qinplus-dengbao-1.0-1.noarch.rpm
 make deb
 sudo dpkg -i dist/qinplus-dengbao_1.0_amd64.deb
 </pre>
-<p>依赖：python3（必需）、python3-pyqt5（桌面版）、python3-paramiko（SSH 远程检测）、python3-docx（Word 报告）。</p>
+<p>依赖（建议统一用 pip 安装，镜像更快、版本可控）：</p>
+<pre>
+python3 -m pip install -i https://mirrors.aliyun.com/pypi/simple/ \
+    dataclasses PyQt5==5.14.2 paramiko==2.12.0 cryptography==3.3.2 \
+    bcrypt==3.2.0 pynacl==1.4.0 python-docx==0.8.11
+</pre>
+<p>说明：dataclasses 在 Python 3.7+ 已内置；Python 3.6（CentOS 7 / 麒麟 V10 等）需单独安装。PyQt5 仅桌面版需要，命令行版可不装。</p>
 
 <h3>三、界面导航</h3>
 <ul>
@@ -81,7 +87,7 @@ qinplus-dengbao-cli --quiz 已答问卷.csv                     # 将问卷答�
 <li><b>SSH 连接失败</b>：确认目标开启 22 端口、账号口令正确；密钥登录请使用 --keyfile 或在界面选择私钥文件。</li>
 <li><b>检测项显示「需人工核查」</b>：该类项属于物理环境或管理要求，请在问卷评估中作答。</li>
 <li><b>报告输出位置</b>：默认在桌面「等保自查报告」文件夹，可在系统设置中修改。</li>
-<li><b>Linux 桌面版无法启动</b>：提示未安装 PyQt5 时，执行 sudo apt install python3-pyqt5（或 yum install python3-qt5）。</li>
+<li><b>Linux 桌面版无法启动</b>：提示未安装 PyQt5 时，执行 python3 -m pip install -i https://mirrors.aliyun.com/pypi/simple/ PyQt5==5.14.2（Python 3.6 请用 5.14.2，详见 README「Linux 依赖安装常见问题」）。</li>
 </ul>
 
 <h3>七、免责声明</h3>

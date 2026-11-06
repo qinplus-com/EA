@@ -57,25 +57,43 @@ fi
 PY_VER="$("$python" -c 'import sys;print(sys.version.split()[0])')"
 echo "检查 Python ：$python ($PY_VER)"
 
+# dataclasses 在 Python 3.7+ 为内置模块，3.6 需 pip 安装 backport
+MISSING=0
+PIP_MIRROR="https://mirrors.aliyun.com/pypi/simple/"
+if "$python" -c 'import dataclasses' >/dev/null 2>&1; then
+    echo "检查 dataclasses：已就绪（Python 3.7+ 内置）"
+else
+    echo "检查 dataclasses：未安装（必需，core 模块依赖；Python 3.6 需 backport）"
+    echo "            请执行：$python -m pip install -i $PIP_MIRROR dataclasses"
+    MISSING=1
+fi
+
 if "$python" -c 'import PyQt5' >/dev/null 2>&1; then
     echo "检查 PyQt5  ：已安装（桌面版可用）"
     HAVE_QT=1
 else
     echo "检查 PyQt5  ：未安装（桌面版不可用，命令行版仍可安装使用）"
-    echo "            国产系统可执行：sudo apt install python3-pyqt5  或  sudo yum install python3-qt5"
+    echo "            请执行：$python -m pip install -i $PIP_MIRROR PyQt5==5.14.2"
+    echo "            （Python 3.6 且 pip 较旧时请用 5.14.2，详见 README「Linux 依赖安装常见问题」）"
     HAVE_QT=0
+    MISSING=1
 fi
 
 if "$python" -c 'import paramiko' >/dev/null 2>&1; then
     echo "检查 paramiko：已安装（SSH 远程检测可用）"
 else
-    echo "检查 paramiko：未安装（SSH 远程检测不可用，可执行 sudo apt install python3-paramiko）"
+    echo "检查 paramiko：未安装（SSH 远程检测不可用）"
+    echo "            请执行：$python -m pip install -i $PIP_MIRROR \\"
+    echo "                    paramiko==2.12.0 cryptography==3.3.2 bcrypt==3.2.0 pynacl==1.4.0"
+    MISSING=1
 fi
 
 if "$python" -c 'import docx' >/dev/null 2>&1; then
     echo "检查 python-docx：已安装（Word 报告导出可用）"
 else
-    echo "检查 python-docx：未安装（Word 报告不可用，可执行 sudo apt install python3-docx）"
+    echo "检查 python-docx：未安装（Word 报告不可用）"
+    echo "            请执行：$python -m pip install -i $PIP_MIRROR python-docx==0.8.11"
+    MISSING=1
 fi
 
 # 生成 Makefile
@@ -90,6 +108,13 @@ echo "  安装前缀 : $prefix"
 echo "  桌面版   : $prefix/bin/$name"
 echo "  命令行版 : $prefix/bin/$name-cli"
 echo "  程序文件 : $prefix/share/$name"
+if [ "$MISSING" = "1" ]; then
+    echo ""
+    echo "注意：仍有依赖未安装，可一次性补齐："
+    echo "  $python -m pip install -i $PIP_MIRROR \\"
+    echo "      dataclasses PyQt5==5.14.2 paramiko==2.12.0 cryptography==3.3.2 \\"
+    echo "      bcrypt==3.2.0 pynacl==1.4.0 python-docx==0.8.11"
+fi
 echo ""
 echo "下一步：make && sudo make install"
 echo "打包    ：make rpm   /   make dist"

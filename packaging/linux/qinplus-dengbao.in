@@ -9,7 +9,8 @@ fi
 
 if ! "$PY" -c 'import PyQt5' >/dev/null 2>&1; then
     echo "未安装 PyQt5，桌面版无法启动。" >&2
-    echo "请安装：sudo apt install python3-pyqt5  或  sudo yum install python3-qt5" >&2
+    echo "请执行：$PY -m pip install -i https://mirrors.aliyun.com/pypi/simple/ PyQt5==5.14.2" >&2
+    echo "（Python 3.6 且 pip 较旧时请用 5.14.2，详见 README「Linux 依赖安装常见问题」）" >&2
     echo "命令行版可用：qinplus-dengbao-cli --help" >&2
     exit 1
 fi
