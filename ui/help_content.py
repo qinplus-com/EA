@@ -86,7 +86,7 @@ qinplus-dengbao-cli --quiz 已答问卷.csv                     # 将问卷答�
 <ul>
 <li><b>SSH 连接失败</b>：确认目标开启 22 端口、账号口令正确；密钥登录请使用 --keyfile 或在界面选择私钥文件。</li>
 <li><b>检测项显示「需人工核查」</b>：该类项属于物理环境或管理要求，请在问卷评估中作答。</li>
-<li><b>报告输出位置</b>：默认在桌面「等保自查报告」文件夹，可在系统设置中修改。</li>
+<li><b>报告输出位置</b>：默认在应用所在目录（解压目录），可在系统设置中修改；压缩包内附「报告样例」文件夹，可直接打开查看报告样式。</li>
 <li><b>Linux 桌面版无法启动</b>：提示未安装 PyQt5 时，执行 python3 -m pip install -i https://mirrors.aliyun.com/pypi/simple/ PyQt5==5.14.2（Python 3.6 请用 5.14.2，详见 README「Linux 依赖安装常见问题」）。</li>
 </ul>
 

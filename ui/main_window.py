@@ -1575,11 +1575,11 @@ class HomePage(QWidget):
             out_dir = os.path.join(appconfig.get("report_dir"), "批量")
             os.makedirs(out_dir, exist_ok=True)
             # 用目标名称+日期生成文件名
-            name = (target.name or summary.target or "等保自查").strip()
+            name = (target.name or summary.target or "等保测评").strip()
             for ch in '\\/:*?"<>|':
                 name = name.replace(ch, "_")
             stamp = datetime.now().strftime("%Y%m%d_%H%M")
-            base = "%s-%s" % (name or "等保自查", stamp)
+            base = "%s-%s" % (name or "等保测评", stamp)
             # HTML 报告
             html_path = os.path.join(out_dir, "%s.html" % base)
             report.export_html(summary, html_path)
@@ -2793,11 +2793,11 @@ td.data{padding:10px;text-align:left;border-bottom:1px solid %s;}
 
     def _export_name(self, s):
         """报告文件名：被测对象-日期时间（如 设备与计算安全-192_168_1_1-20261103_1530）"""
-        name = (s.target or "等保自查").strip()
+        name = (s.target or "等保测评").strip()
         for ch in '\\/:*?"<>|':
             name = name.replace(ch, "_")
         stamp = datetime.now().strftime("%Y%m%d_%H%M")
-        return "%s-%s" % (name or "等保自查", stamp)
+        return "%s-%s" % (name or "等保测评", stamp)
 
     def _report_dir(self):
         """报告默认输出目录：配置项 report_dir，不存在时创建"""

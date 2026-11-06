@@ -5,21 +5,32 @@
 """
 import json
 import os
+import sys
 
 CONF_DIR = os.path.join(os.path.expanduser("~"), ".ea_dengbao")
 CONF_PATH = os.path.join(CONF_DIR, "settings.json")
 
+
+def _app_dir():
+    """程序所在目录：解压版为 exe 同级目录，源码运行为项目根目录"""
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(os.path.abspath(sys.executable))
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
 def _default_report_dir():
-    """默认报告目录：优先桌面，桌面不存在时退回用户主目录（兼容国产 Linux）。"""
-    home = os.path.expanduser("~")
-    for name in ("Desktop", "桌面"):
-        d = os.path.join(home, name)
-        if os.path.isdir(d):
-            return os.path.join(d, "等保自查报告")
-    return os.path.join(home, "等保自查报告")
+    """默认报告目录：应用所在目录（不可写时由导出逻辑回退到用户主目录）"""
+    return _app_dir()
 
 
 DEFAULT_REPORT_DIR = _default_report_dir()
+
+# 旧版默认报告目录（桌面\等保自查报告），首次升级时自动替换为新默认值
+_LEGACY_REPORT_DIRS = {
+    os.path.join(os.path.expanduser("~"), "Desktop", "等保自查报告"),
+    os.path.join(os.path.expanduser("~"), "桌面", "等保自查报告"),
+    os.path.join(os.path.expanduser("~"), "等保自查报告"),
+}
 
 DEFAULTS = {
     "report_dir": DEFAULT_REPORT_DIR,
@@ -54,9 +65,11 @@ def load():
                     cfg[k] = v
     except Exception:
         pass
-    # 旧版默认标题升级（用户自定义过的标题保持不变）
+    # 旧版默认标题/目录升级（用户自定义过的值保持不变）
     if cfg.get("report_title") in ("等保自查报告", "勤加等保测评助手报告"):
         cfg["report_title"] = DEFAULTS["report_title"]
+    if cfg.get("report_dir") in _LEGACY_REPORT_DIRS:
+        cfg["report_dir"] = DEFAULTS["report_dir"]
     _cache = cfg
     return dict(cfg)
 

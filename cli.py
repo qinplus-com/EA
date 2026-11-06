@@ -268,7 +268,7 @@ def main(argv=None):
 
     out_dir = os.path.abspath(args.out or os.path.join(os.getcwd(), "ea-reports"))
     os.makedirs(out_dir, exist_ok=True)
-    safe = "".join(c if c not in '\\/:*?"<>|' else "_" for c in (summary.target or "等保自查"))
+    safe = "".join(c if c not in '\\/:*?"<>|' else "_" for c in (summary.target or "等保测评"))
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     base = os.path.join(out_dir, "%s-%s" % (safe, stamp))
     quiz_items = qd.get_quiz_items(level, layers=None)
