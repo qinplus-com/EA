@@ -68,6 +68,73 @@ make rpm                 # RPM 安装包
 make deb                 # DEB 安装包
 ```
 
+### Linux 依赖安装常见问题
+
+**1. yum 没有 `python3-pyqt5`**
+
+`python3-pyqt5` 是 Debian/Ubuntu 的包名。CentOS / RHEL / 麒麟服务器版请用 EPEL 源，包名前缀不同：
+
+```bash
+# CentOS 7（Python 3.6，包名带 python36- 前缀）
+sudo yum install -y epel-release
+sudo yum install -y python36-qt5 python36-paramiko
+
+# CentOS / Rocky 8、9 或麒麟 V10 服务器版
+sudo yum install -y epel-release
+sudo yum install -y python3-qt5 python3-paramiko
+```
+
+可用镜像（EPEL）：
+
+| 镜像 | 地址 |
+| --- | --- |
+| 阿里云 | `https://mirrors.aliyun.com/epel/` |
+| 清华 | `https://mirrors.tuna.tsinghua.edu.cn/epel/` |
+| 华为云 | `https://repo.huaweicloud.com/epel/` |
+
+**2. `Could not find a version that satisfies the requirement PyQt5-Qt5>=5.15.2`**
+
+原因：CentOS 7 自带的 pip 是 9.x，不识别 `manylinux2014` 轮子标签，`PyQt5-Qt5` 的 wheel 被全部过滤掉。两种解法任选其一：
+
+```bash
+# 方案 A（推荐）：PyQt5 5.14.2 把 Qt 内置在同一个 manylinux1 轮子里，无该依赖
+sudo python3 -m pip install -i https://mirrors.aliyun.com/pypi/simple/ PyQt5==5.14.2
+
+# 方案 B：升级 pip（21.3.1 是最后一个支持 Python 3.6 的版本）后再装最新版
+sudo python3 -m pip install -i https://mirrors.aliyun.com/pypi/simple/ --upgrade "pip==21.3.1"
+sudo python3 -m pip install -i https://mirrors.aliyun.com/pypi/simple/ PyQt5==5.15.6
+```
+
+pip 自身升级失败时，可离线引导：
+
+```bash
+curl -L -o get-pip.py https://bootstrap.pypa.io/pip/3.6/get-pip.py
+sudo python3 get-pip.py -i https://mirrors.aliyun.com/pypi/simple/
+```
+
+**3. 其余依赖在老 pip 上也要锁版本**
+
+```bash
+sudo python3 -m pip install -i https://mirrors.aliyun.com/pypi/simple/ \
+    paramiko==2.12.0 cryptography==3.3.2 bcrypt==3.2.0 pynacl==1.4.0 python-docx==0.8.11
+```
+
+**4. 启动报 xcb 插件加载失败**
+
+```bash
+sudo yum install -y mesa-libGL libXext libXrender libX11-xcb libxcb libxkbcommon-x11
+```
+
+**5. 安装后自检**
+
+```bash
+python3 -c "import PyQt5.QtCore as c; print('PyQt5', c.PYQT_VERSION_STR)"
+python3 -c "import paramiko, docx; print('依赖 OK')"
+qinplus-dengbao-cli --list-layers     # 命令行版可用即说明数据与检测项正常
+```
+
+注意：`pip3` 必须与运行程序的 `python3` 是同一个解释器（`pip3 -V` 的路径应为 python3.6）。
+
 ## 目录结构
 
 ```
