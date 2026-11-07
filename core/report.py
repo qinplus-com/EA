@@ -24,7 +24,7 @@ _ANSWER_TEXT = {"conform": "符合", "partial": "部分符合",
 _CSS = """
 *{box-sizing:border-box}
 body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;max-width:1000px;margin:0 auto;padding:40px 24px;color:#1e293b;background:#fff}
-h1{font-size:28px;border-bottom:3px solid #2563eb;padding-bottom:12px;color:#1e3a8a}
+p.rpt-title{font-size:28px;font-weight:800;line-height:1.2;margin:0 0 18px;border-bottom:3px solid #2563eb;padding-bottom:12px;color:#1e3a8a}
 h2{font-size:20px;margin-top:36px;color:#1e40af;border-left:4px solid #2563eb;padding-left:10px}
 h3{font-size:16px;margin-top:24px;color:#1e3a8a}
 h4{font-size:14px;margin:16px 0 6px;color:#334155}
@@ -47,7 +47,7 @@ th{background:#eff6ff;color:#1e40af}
 # 供 QTextDocument/Pdf 打印的精简样式：浅色背景、无 flex/grid，避免整页黑底
 _PRINT_CSS = """
 body{font-family:"Microsoft YaHei","SimSun",sans-serif;color:#000000;background:#ffffff;font-size:10pt}
-h1{font-size:18pt;color:#000000;border-bottom:1px solid #444444;padding-bottom:6pt}
+p.rpt-title{font-size:18pt;font-weight:bold;margin:0 0 10pt;color:#000000;border-bottom:1px solid #444444;padding-bottom:6pt}
 h2{font-size:14pt;color:#000000;margin-top:16pt}
 h3{font-size:12pt;color:#000000;margin-top:12pt}
 h4{font-size:10pt;color:#000000;margin:8pt 0 4pt}
@@ -112,8 +112,8 @@ def _logo_src():
         return path.replace("\\", "/")
 
 
-def _logo_size(default_h=40, max_w=360):
-    """Logo 统一等比缩放到默认高度 40px（超出最大宽度时按宽度收缩），返回 (宽, 高)"""
+def _logo_size(default_h=28, max_w=360):
+    """Logo 按原图比例缩放到指定高度（默认与标题文字等高 28px），返回 (宽, 高)"""
     path = _logo_path()
     try:
         from PIL import Image
@@ -129,16 +129,22 @@ def _logo_size(default_h=40, max_w=360):
     return max(1, int(round(w * scale))), max(1, int(round(h * scale)))
 
 
-def _title_html():
-    """报告抬头：可配置标题 + 可选 Logo（等比缩放到默认高度）"""
+def _title_html(print_friendly=False):
+    """报告抬头：可配置标题 + 可选 Logo，Logo 高度始终与标题文字等高并保持宽高比"""
+    # 标题字号：屏幕/预览 28px；打印/PDF 18pt（PDF 中 1pt≈2px，Logo 取 36px 等高）
+    if print_friendly:
+        title_style, logo_h = "font-size:18pt", 36
+    else:
+        title_style, logo_h = "font-size:28px", 28
+    head = '<p class="rpt-title" style="%s">' % title_style
     logo = _logo_src()
     if logo:
-        size = _logo_size()
-        attr = ' width="%d" height="%d"' % size if size else ' height="40"'
-        return ('<h1><img src="%s"%s '
-                'style="vertical-align:middle;margin-right:10px">%s</h1>'
-                % (_e(logo), attr, _e(_report_title())))
-    return "<h1>%s</h1>" % _e(_report_title())
+        size = _logo_size(default_h=logo_h)
+        attr = ' width="%d" height="%d"' % size if size else ' height="%d"' % logo_h
+        return ('%s<img src="%s"%s '
+                'style="vertical-align:middle;margin-right:10px">%s</p>'
+                % (head, _e(logo), attr, _e(_report_title())))
+    return "%s%s</p>" % (head, _e(_report_title()))
 
 
 def _score_grade(score):
@@ -415,7 +421,7 @@ def build_html(summary, quiz_items=None, quiz_answers=None, print_friendly=False
 </body></html>""".format(
         title=_e(_report_title()), target=_e(summary.target),
         css=_PRINT_CSS if print_friendly else _CSS,
-        title_html=_title_html(),
+        title_html=_title_html(print_friendly),
         meta=_meta_html(summary),
         score=_score_block(summary.score, grade, gcolor, print_friendly),
         cards=cards,
@@ -437,8 +443,12 @@ def _add_docx_logo(doc):
         return
     try:
         from docx.shared import Inches
-        # 与 HTML/PDF 一致：统一等比缩放到默认高度 40px（96dpi 下约 0.42 英寸）
-        doc.add_picture(logo, height=Inches(40 / 96.0))
+        # 与报告标题（Title 样式，默认 26pt）等高；只给高度，宽度按原图比例换算
+        try:
+            title_pt = doc.styles["Title"].font.size.pt
+        except Exception:
+            title_pt = 26.0
+        doc.add_picture(logo, height=Inches(title_pt / 72.0))
     except Exception:
         # Logo 损坏/格式不支持时不影响报告主体导出
         pass
@@ -745,7 +755,7 @@ def build_batch_html(items, quiz_items=None, quiz_answers=None, print_friendly=F
 </body></html>""".format(
         title=_e(_report_title()),
         css=_PRINT_CSS if print_friendly else _CSS,
-        title_html=_title_html().replace("</h1>", "（批量汇总）</h1>"),
+        title_html=_title_html(print_friendly).replace("</p>", "（批量汇总）</p>"),
         cards=cards,
         table_start=_table_start(print_friendly),
         summary_rows=summary_rows, fail_section=_fail_section_html(items, print_friendly),
